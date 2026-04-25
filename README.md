@@ -1,57 +1,69 @@
-# Sentio V2.0 (Dual-Track Fall Detection)
+# Sentio V2.0: Dual-Track Biometric Fall Detection System
 
-This repository provides an executable V2.0 prototype for:
+Sentio V2.0 is a research-oriented IoT framework designed for robust human fall detection. By integrating multi-modal sensor data (3-axis Accelerometer, 3-axis Gyroscope, and Barometric Altimeter), the system implements a **Dual-Track Decision Logic** to minimize false alarms while maintaining high sensitivity for complex fall scenarios.
 
-- Day 3: barometer denoising with Butterworth low-pass filter
-- Day 4: millisecond alignment and feature-bank construction
-- Day 5: dual-track decision logic (`Track A` impact + `Track B` height/posture timeout)
-- Day 6: offline evaluation and ablation study
-- Day 7: 5D physical-state dashboard plotting
+## 🚀 Key Features
 
-## 1) Install
+- **Signal Conditioning:** Real-time barometer denoising via a 2nd-order Butterworth low-pass filter.
+- **Dual-Track Fusion:** - `Track A`: High-G impact detection and SVM (Signal Vector Magnitude) analysis.
+    - `Track B`: Barometric altitude change monitoring and posture timeout verification.
+- **Feature Bank:** Automated construction of time-series feature sets with millisecond-level alignment.
+- **Evaluation Suite:** Comprehensive offline evaluation pipeline supporting ablation studies and performance metrics (Precision, Recall, F1-Score).
+- **Visualization:** Integrated 5D physical-state dashboard for in-depth event analysis.
+
+## 🛠️ Project Structure
+
+- `src/sentio_v2/`: Core algorithm implementation and detection logic.
+- `scripts/`: Utility scripts for synthetic data generation and data cleaning.
+- `data/`: Local storage for raw and processed sensor datasets.
+- `outputs/`: Performance reports and visualization results.
+
+## 💻 Installation
+
+Ensuring your Python environment is ready for signal processing:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 2) Generate Day-2 style dataset (demo)
+## 📊 Quick Start
+
+### 1. Data Preparation (Simulation)
+Generate a standardized benchmark dataset for testing the pipeline:
 
 ```bash
 python scripts/generate_synthetic_dataset.py
 ```
 
-This creates 5 classes x 15 clips under `data/day2`.
-
-## 3) Run offline evaluation + ablation
+### 2. Run Offline Evaluation & Ablation Study
+Validate the dual-track logic against the dataset and analyze the impact of the barometric component:
 
 ```bash
-python -m src.sentio_v2.main_offline --data-dir data/day2 --one-clip data/day2/hard_fall_00.csv --out-dir outputs
+python -m src.sentio_v2.main_offline --data-dir data/day2 --out-dir outputs
 ```
 
-Outputs:
-
-- `outputs/ablation.csv`
-- `outputs/five_dim_dashboard.png`
-- `outputs/run_meta.json`
-
-## 4) Realtime replay simulation
+### 3. Real-time Simulation Replay
+Simulate the hardware runtime environment using pre-recorded data at 50Hz:
 
 ```bash
 python -m src.sentio_v2.main_realtime --clip data/day2/soft_fall_00.csv --replay-hz 50
 ```
 
-## CSV schema
+## 📈 Data Schema
+The system expects standardized CSV inputs with the following fields:
+| Column | Unit | Description |
+| :--- | :--- | :--- |
+| `timestamp_ms` | ms | Monotonic millisecond timestamp |
+| `acc_x/y/z` | g | 3-axis linear acceleration |
+| `gyro_x/y/z` | deg/s | 3-axis angular velocity |
+| `baro_m` | m | Relative altitude derived from barometric pressure |
 
-Each clip CSV should include:
+## 📡 Future Deployment (IoMT)
+- **Edge Computing:** Porting the `DualTrackDetector` state machine to React Native for mobile-side inference.
+- **Cloud Alerting:** Integrated alert payload delivery via Firebase Cloud Messaging (FCM).
+- **Medical IoT:** Optimized for elderly care monitoring with low-power sensor polling.
 
-- `timestamp_ms`
-- `acc_x`, `acc_y`, `acc_z` (g)
-- `gyro_x`, `gyro_y`, `gyro_z` (deg/s)
-- `baro_m` (relative meter scale)
-
-## Notes for Week-2 App deployment
-
-- Keep this Python implementation as the algorithm baseline.
-- Port `DualTrackDetector` thresholds and state machine to React Native / Flutter runtime.
-- Send alert payload to Firebase when event reason is `track_a_impact` or `track_b_height_posture_timeout`.
+---
+© 2026 Sentio Project | Developed by Yuni
+```
 
