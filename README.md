@@ -65,5 +65,3 @@ The system expects standardized CSV inputs with the following fields:
 
 ---
 © 2026 Sentio Project | Developed by Yuni
-```
-
