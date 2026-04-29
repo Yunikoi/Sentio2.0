@@ -4,7 +4,7 @@ Sentio V2.0 is a research-oriented IoT framework designed for robust human fall 
 
 ## 🚀 Key Features
 
-- **Signal Conditioning:** Real-time barometer denoising via a 2nd-order Butterworth low-pass filter.
+- **Signal Conditioning:** Real-time barometer denoising via a 2nd-order Butterworth low-pass filter....
 - **Dual-Track Fusion:** - `Track A`: High-G impact detection and SVM (Signal Vector Magnitude) analysis.
     - `Track B`: Barometric altitude change monitoring and posture timeout verification.
 - **Feature Bank:** Automated construction of time-series feature sets with millisecond-level alignment.
