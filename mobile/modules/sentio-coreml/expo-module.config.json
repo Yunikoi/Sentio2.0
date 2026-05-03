@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["SentioCoreMLModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.sentiocoreml.SentioCoreMLModule"]
+  }
+}

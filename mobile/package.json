@@ -1,0 +1,27 @@
+{
+  "name": "mobile",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "golden:compute": "tsx scripts/goldenCompute.ts"
+  },
+  "dependencies": {
+    "expo": "~54.0.33",
+    "expo-sensors": "~15.0.8",
+    "expo-status-bar": "~3.0.9",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "sentio-coreml": "file:./modules/sentio-coreml"
+  },
+  "devDependencies": {
+    "@expo/config-plugins": "~54.0.4",
+    "@types/react": "~19.1.0",
+    "tsx": "^4.19.0",
+    "typescript": "~5.9.2"
+  },
+  "private": true
+}

@@ -1,0 +1,4 @@
+# Optional: export RandomForest from outputs/ml_row to Core ML (.mlmodel).
+# Install on the machine where you train (Windows/macOS/Linux for export; iOS runs the .mlmodel).
+coremltools>=7.0
+joblib>=1.3

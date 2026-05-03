@@ -1,0 +1,19 @@
+{
+  "fall_activity_folder": "AdultManFall",
+  "label_rule": "label=1 iff activity folder name == 'AdultManFall'; all other folders label=0",
+  "sessions_total": 10,
+  "sessions_skipped_missing_imu": 1,
+  "sessions_fall_used": 1,
+  "sessions_nonfall_used": 8,
+  "estimated_imu_hz_median": 50.37510761284006,
+  "window_samples": 101,
+  "hop_samples": 25,
+  "n_windows": 195,
+  "n_windows_train": 70,
+  "n_windows_test": 125,
+  "warning_single_fall_session": true,
+  "split_policy": "neg_session_group_shuffle_and_fall_chronological",
+  "fall_time_train_ratio": 0.75,
+  "n_fall_windows_train": 2,
+  "n_fall_windows_test": 1
+}
