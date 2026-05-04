@@ -92,6 +92,78 @@ def _print_run_line(tag: str, scores: Dict[str, float], roc_auc_val, latency_ms_
     )
 
 
+def _build_method_hierarchy(aggregate: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Structured method tiering: heuristic → classical ML → advanced ML (for JSON / papers)."""
+    spec = [
+        (1, "Threshold", "heuristic", "baseline_peak_acc", "peak_acc_vector_max_norm_threshold"),
+        (2, "Logistic Regression", "classical_ml", "logistic_regression", "sklearn LogisticRegression + StandardScaler"),
+        (3, "Random Forest", "advanced_ml", "random_forest", "sklearn RandomForestClassifier"),
+    ]
+    out: List[Dict[str, Any]] = []
+    for order, name, tier, agg_key, impl in spec:
+        block = aggregate.get(agg_key, {})
+        row: Dict[str, Any] = {
+            "order": order,
+            "method": name,
+            "tier": tier,
+            "implementation": impl,
+        }
+        if block.get("skipped"):
+            row["skipped"] = True
+            row["reason"] = block.get("reason", "skipped")
+        else:
+            row["macro_f1_mean"] = block["macro_f1_mean"]
+            row["macro_f1_std"] = block["macro_f1_std"]
+            row["fall_f1_mean"] = block["fall_f1_mean"]
+            row["fall_f1_std"] = block["fall_f1_std"]
+            if "roc_auc_mean" in block:
+                row["roc_auc_mean"] = block["roc_auc_mean"]
+                row["roc_auc_std"] = block["roc_auc_std"]
+        out.append(row)
+    return out
+
+
+def _print_method_hierarchy_summary(seeds: List[int], aggregate: Dict[str, Any]) -> None:
+    """High-signal summary: multi-run mean ± std, explicit method hierarchy (project → research)."""
+    sep = "=" * 72
+    print(sep)
+    print(
+        f"Multi-run: for seed in {seeds}: train + evaluate  (N={len(seeds)})  "
+        "|  method hierarchy: Threshold → Logistic → RF"
+    )
+    print(sep)
+    rows = [
+        ("baseline_peak_acc", "Threshold", "heuristic"),
+        ("logistic_regression", "Logistic Regression", "classical ML"),
+        ("random_forest", "Random Forest (RF)", "advanced ML"),
+    ]
+    for key, title, tier in rows:
+        b = aggregate.get(key, {})
+        label = f"{title} ({tier})"
+        if b.get("skipped"):
+            print(f"  {label}")
+            print("    macro-F1: n/a (skipped)")
+            continue
+        mm, ms = b["macro_f1_mean"], b["macro_f1_std"]
+        fm, fs = b["fall_f1_mean"], b["fall_f1_std"]
+        print(f"  {label}")
+        print(f"    macro-F1: {mm:.2f} ± {ms:.2f}    fall-F1: {fm:.2f} ± {fs:.2f}")
+    print(sep)
+    one: List[str] = []
+    bl = aggregate.get("baseline_peak_acc", {})
+    lr = aggregate.get("logistic_regression", {})
+    rf = aggregate.get("random_forest", {})
+    if not bl.get("skipped"):
+        one.append(f"Baseline macro-F1: {bl['macro_f1_mean']:.2f} ± {bl['macro_f1_std']:.2f}")
+    if not lr.get("skipped"):
+        one.append(f"LogReg macro-F1: {lr['macro_f1_mean']:.2f} ± {lr['macro_f1_std']:.2f}")
+    if not rf.get("skipped"):
+        one.append(f"RF macro-F1: {rf['macro_f1_mean']:.2f} ± {rf['macro_f1_std']:.2f}")
+    if one:
+        print("One-line (copy for text):  " + "  |  ".join(one))
+    print(sep)
+
+
 def _print_aggregate(agg: Dict[str, Any]) -> None:
     print(f"[aggregate over {agg['n_runs']} runs] mean ± std (macro_f1 / fall_f1 / roc_auc where applicable)")
     for name in ("baseline_peak_acc", "logistic_regression", "random_forest"):
@@ -399,12 +471,17 @@ def main() -> None:
         default=0.25,
         help="Fraction of sessions in the test split (group shuffle by session)",
     )
-    parser.add_argument("--seed", type=int, default=42, help="Base RNG seed for the first run")
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="First split seed; seeds used are seed, seed+1, … For [0,1,2,3,4] use --seed 0 --n-runs 5",
+    )
     parser.add_argument(
         "--n-runs",
         type=int,
         default=5,
-        help="Number of repeated evaluations with seeds seed, seed+1, ... (report mean±std)",
+        help="Repeated train+evaluate count (multi-run); report macro/fall F1 as mean±std over runs",
     )
     parser.add_argument(
         "--fall-train-ratio",
@@ -462,14 +539,15 @@ def main() -> None:
     feature_cols = [c for c in win_df.columns if c not in ("label", "session_group", "window_t_mid")]
 
     n_runs = max(1, int(args.n_runs))
+    seeds = [int(args.seed + i) for i in range(n_runs)]
+    print(f"[multi-run] for seed in {seeds}: train + evaluate (N={n_runs})")
     runs: List[dict] = []
     best_macro = -1.0
     best_clf: Optional[RandomForestClassifier] = None
     best_seed = args.seed
     best_run_idx = 0
 
-    for i in range(n_runs):
-        seed = int(args.seed + i)
+    for i, seed in enumerate(seeds):
         run_out, clf_rf, _, _ = evaluate_one_seed(
             win_df,
             feature_cols,
@@ -502,7 +580,7 @@ def main() -> None:
         "hop_samples": int(hop_samples),
         "n_windows": int(len(win_df)),
         "n_eval_runs": n_runs,
-        "eval_seeds": [int(args.seed + i) for i in range(n_runs)],
+        "eval_seeds": seeds,
         "artifact_policy": "random_forest_joblib_from_run_with_highest_test_macro_f1",
         "artifact_run_index": int(best_run_idx),
         "artifact_seed": int(best_seed),
@@ -520,6 +598,7 @@ def main() -> None:
         "n_runs": n_runs,
         "runs": runs,
         "aggregate_mean_std": aggregate,
+        "method_hierarchy": _build_method_hierarchy(aggregate),
         "best_run_by_random_forest_macro_f1": best_run,
         "baseline_vs_rf_same_test_split": {
             "note": "Per-run fields use *_peak_acc / random_forest / logistic_regression; see runs[] and aggregate_mean_std.",
@@ -583,6 +662,7 @@ def main() -> None:
     else:
         print(f"[baseline skipped] {bl.get('reason', '')}")
 
+    _print_method_hierarchy_summary(seeds, aggregate)
     _print_aggregate(aggregate)
     print(json.dumps(out_metrics, indent=2, ensure_ascii=False))
     print(saved_msg)

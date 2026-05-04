@@ -50,13 +50,14 @@ python -m src.sentio_v2.main_realtime --clip data/day2/soft_fall_00.csv --replay
 ```
 
 ### 4. Row-format sessions: baselines, repeated splits, metrics
-Train/evaluate on `data_sensor/row` (fused IMU + optional barometer). Each **run** uses a different `GroupShuffleSplit` seed so negative sessions move between train and test; metrics are summarized as **mean ± std** over all runs. Methods compared on the **same** split within a run: peak-acceleration threshold baseline, **Logistic Regression** (with `StandardScaler`), and **Random Forest**. The saved `fall_rf_row.joblib` is the RF from the run with the **highest test macro-F1** among runs.
+Train/evaluate on `data_sensor/row` (fused IMU + optional barometer). The script runs **multi-run** evaluation: `for seed in [seed0, seed0+1, …]: train + evaluate`, then reports **macro-F1 (and fall-F1) as mean ± std**—this is the usual “project → research” upgrade. Within each run, methods share the **same** split and form an explicit **method hierarchy**: **Threshold** (heuristic) → **Logistic Regression** (classical ML, `StandardScaler`) → **Random Forest** (advanced ML). The saved `fall_rf_row.joblib` is the RF from the run with the **highest test macro-F1** among runs.
 
 ```bash
-python -m src.sentio_v2.main_train_row --row-root data_sensor/row --out-dir outputs/ml_row --n-runs 5 --seed 42
+# Seeds [0,1,2,3,4] with 5 runs:
+python -m src.sentio_v2.main_train_row --row-root data_sensor/row --out-dir outputs/ml_row --n-runs 5 --seed 0
 ```
 
-Artifacts: `outputs/ml_row/metrics.json` (`runs`, `aggregate_mean_std`, `best_run_by_random_forest_macro_f1`), `outputs/ml_row/train_meta.json`.
+The console prints a **method hierarchy** block (e.g. `RF macro-F1: 0.91 ± 0.02`, `Baseline macro-F1: 0.73 ± 0.03`—numbers depend on your data). Artifacts: `outputs/ml_row/metrics.json` (`runs`, `aggregate_mean_std`, `method_hierarchy`, `best_run_by_random_forest_macro_f1`), `outputs/ml_row/train_meta.json`.
 
 ## Error Analysis
 Fall detection from wrist- or pocket-mounted IMU is inherently ambiguous: **high-energy non-fall activities** (fast sit, jogging, door slam vibration) can resemble impact peaks, while **soft or staged falls** may produce weaker acceleration signatures than rigid-body models assume. In windowed evaluation, errors show up in two ways: **false positives** (non-fall windows scored as fall) inflate alert load and erode trust; **false negatives** (fall windows missed) are safety-critical. When only one fall session exists, the pipeline may place **all fall windows in train** (see `train_meta.json` notes), which makes reported test performance **optimistic for the fall class**—treat single-session setups as exploratory, not definitive. Use **multiple random splits** (`--n-runs`) to quantify variance, inspect per-run confusion matrices in `metrics.json`, and relate mistakes to activity labels and sensor placement.
