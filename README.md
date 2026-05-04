@@ -14,7 +14,29 @@ A complementary **method-facing question** is encoded in optional **3-class wind
 
 Empirical claims are backed by the **offline dual-track ablations** (`main_offline`) and the **window-level method hierarchy** on session data (`main_train_row`); reported numbers depend on your dataset and split design.
 
-##  Key Features
+### Key contributions (method-level)
+
+1. **Dual-track, cross-modal event logic for phone-only sensing.** We formulate fall detection as **temporally coupled** decisions: an inertial **impact track** (high-G and gyro gating) combined with a **slow-context track** (barometric height change and posture tilt with cooldown), rather than a single threshold on IMU magnitude alone—targeting false positives from vigorous ADL while keeping a clear engineering path to on-device deployment.
+
+2. **Explicit 3-way disambiguation task (person fall vs. device drop vs. ADL).** Beyond binary “fall vs. not,” we operationalize **smartphone-specific confusion**—high-energy impacts that are **not** a person fall—via a **multiclass window protocol** (`--task multiclass`) with session-integrity splits, turning a systems integration into a **testable recognition claim** about class semantics.
+
+3. **Nested baseline hierarchy and gap analysis on the same splits.** We fix a **reproducible ladder**: peak-acceleration threshold → scaled logistic regression → random forest on **identical** train/test partitions with **multi-seed** reporting (mean ± std), so improvements are attributed to **representation capacity**, not split luck—supporting a defensible “baseline gap” narrative for papers.
+
+4. **Component ablations with interpretable hypotheses.** Offline evaluation separates **full dual-track**, **barometer removed**, and **Track B disabled**, tied to concrete hypotheses (e.g., whether altitude/posture context changes clip-level decisions). The README records **how to read** ablation outcomes, not only that tables exist.
+
+### One-sentence insight
+
+> **We argue that temporal cross-modal consistency—short-horizon inertial impact coupled with slower barometric and posture context on the same handset—is the right abstraction for reducing false positives in smartphone-only fall detection, and we pair it with a multiclass “person vs. phone-drop vs. ADL” protocol so that ambiguity is evaluated rather than hidden.**
+
+*(Empirical strength depends on your recordings; see **Baseline gap analysis**, **Ablation conclusions**, and `train_meta.json` caveats.)*
+
+### Abstract (workshop / arXiv–style)
+
+Fall detection for older adults often assumes **extra wearables**, which can hurt **adherence** and feel stigmatizing. **Smartphones** are already carried daily and avoid that burden, but **pocket- and hand-carried** IMU streams conflate **person falls**, **device-only drops**, and **vigorous activities** behind similar acceleration peaks. **Sentio V2.0** studies **phone-only** monitoring using **IMU plus on-device barometric altitude**, organized as a **dual-track detector**: an impact-oriented track fires on high-energy motion, while a second track checks **height and posture consistency** over a longer window with denoised pressure. We release an **evaluation stack** that (i) runs **offline ablations** isolating barometer and posture-height logic, and (ii) trains **window classifiers** under a **nested baseline hierarchy** (threshold → logistic regression → random forest) with **repeated random splits** and optional **three-class** training to separate **person falls**, **phone drops**, and **ADL**. This artifact is intended as a **methods-and-protocol paper** companion (e.g., mobile sensing / IoT / ubiquitous computing workshops or a short arXiv note): we foreground **problem framing, baselines, and ablations** rather than claiming a new deep architecture; **external benchmark alignment** (e.g., public fall datasets) remains important future work. The system is **not** a regulated medical device.
+
+---
+
+## 🚀 Key Features
 
 - **Signal conditioning:** Real-time barometer denoising via a 2nd-order Butterworth low-pass filter.
 - **Dual-track fusion:**
@@ -24,14 +46,14 @@ Empirical claims are backed by the **offline dual-track ablations** (`main_offli
 - **Evaluation Suite:** Comprehensive offline evaluation pipeline supporting ablation studies and performance metrics (Precision, Recall, F1-Score).
 - **Visualization:** Integrated 5D physical-state dashboard for in-depth event analysis.
 
-##  Project Structure
+## 🛠️ Project Structure
 
 - `src/sentio_v2/`: Core algorithm implementation and detection logic.
 - `scripts/`: Utility scripts for synthetic data generation and data cleaning.
 - `data/`: Local storage for raw and processed sensor datasets.
 - `outputs/`: Performance reports and visualization results.
 
-##  Installation
+## 💻 Installation
 
 Ensuring your Python environment is ready for signal processing:
 
@@ -39,7 +61,7 @@ Ensuring your Python environment is ready for signal processing:
 pip install -r requirements.txt
 ```
 
-##  Quick Start
+## 📊 Quick Start
 
 ### 1. Data Preparation (Simulation)
 Generate a standardized benchmark dataset for testing the pipeline:
@@ -110,7 +132,7 @@ Fall detection from a **phone in the pocket or hand** (wrist-like motion is a sp
 ## System Implications
 **Latency and deployment:** Sliding-window inference adds batch predict time per window; `metrics.json` records average milliseconds per test window for threshold, LR, and RF baselines—use these numbers for edge versus cloud discussions (Core ML export is supported from the chosen RF checkpoint). **Privacy:** On-device inference avoids streaming raw sensor traces to a server, which matters for home monitoring. **Robustness:** Barometer-assisted logic (`main_offline` / dual-track path) targets height and posture context; missing or noisy barometer channels change false alarm trade-offs. **Scope:** This repository implements research and engineering prototypes; it is **not** a certified medical device and should not be presented as clinical validation without protocol, ethics review, and regulated study design.
 
-##  Data Schema
+## 📈 Data Schema
 The system expects standardized CSV inputs with the following fields:
 | Column | Unit | Description |
 | :--- | :--- | :--- |
