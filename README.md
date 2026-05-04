@@ -35,11 +35,11 @@ Copy verbatim when you need **non-boilerplate** contribution lines; the reposito
 
 ### Abstract (workshop / arXiv–style)
 
-Fall detection for older adults often assumes **extra wearables**, which can hurt **adherence** and feel stigmatizing. **Smartphones** are already carried daily and avoid that burden, but **pocket- and hand-carried** IMU streams conflate **person falls**, **device-only drops**, and **vigorous activities** behind similar acceleration peaks. **Sentio V2.0** reframes the problem as **cross-modal temporal consistency under ambiguity** and studies **phone-only** monitoring using **IMU plus on-device barometric altitude** in a **dual-track detector** (high-energy inertial gating with slower height/posture context on denoised pressure). We release an **evaluation stack** that (i) runs **offline ablations** isolating barometer and posture-height logic, and (ii) trains **window classifiers** under a **nested baseline hierarchy** (threshold → logistic regression → random forest) with **repeated random splits** and optional **three-class** training. **This work targets ubiquitous computing / mobile sensing protocol design rather than model optimization:** we foreground **task definition, splits, and baselines**, not a new deep architecture leaderboard; **external benchmark alignment** remains future work. The system is **not** SOTA-by-default and **not** a regulated medical device.
+Fall detection for older adults often assumes **extra wearables**, which can hurt **adherence** and feel stigmatizing. **Smartphones** are already carried daily and avoid that burden, but **pocket- and hand-carried** IMU streams conflate **person falls**, **device-only drops**, and **vigorous activities** behind similar acceleration peaks. **Sentio V2.0** reframes the problem as **cross-modal temporal consistency under ambiguity** and studies **phone-only** monitoring using **IMU plus on-device barometric altitude** in a **dual-track detector** (high-energy inertial gating with slower height/posture context on denoised pressure). We release an **evaluation stack** that (i) runs **offline ablations** isolating barometer and posture-height logic, and (ii) trains **window classifiers** under a **nested baseline hierarchy** (threshold → logistic regression → random forest) with **repeated random splits** and optional **three-class** training. **This work focuses on protocol design in ubiquitous sensing rather than model benchmarking** (task definition, session-consistent splits, nested baselines—not a new leaderboard architecture); **external benchmark alignment** remains future work. The system is **not** SOTA-by-default and **not** a regulated medical device.
 
 ---
 
-##  Key Features
+## 🚀 Key Features
 
 - **Signal conditioning:** Real-time barometer denoising via a 2nd-order Butterworth low-pass filter.
 - **Dual-track fusion:**
@@ -49,14 +49,14 @@ Fall detection for older adults often assumes **extra wearables**, which can hur
 - **Evaluation Suite:** Comprehensive offline evaluation pipeline supporting ablation studies and performance metrics (Precision, Recall, F1-Score).
 - **Visualization:** Integrated 5D physical-state dashboard for in-depth event analysis.
 
-##  Project Structure
+## 🛠️ Project Structure
 
 - `src/sentio_v2/`: Core algorithm implementation and detection logic.
 - `scripts/`: Utility scripts for synthetic data generation and data cleaning.
 - `data/`: Local storage for raw and processed sensor datasets.
 - `outputs/`: Performance reports and visualization results.
 
-##  Installation
+## 💻 Installation
 
 Ensuring your Python environment is ready for signal processing:
 
@@ -64,7 +64,7 @@ Ensuring your Python environment is ready for signal processing:
 pip install -r requirements.txt
 ```
 
-##  Quick Start
+## 📊 Quick Start
 
 ### 1. Data Preparation (Simulation)
 Generate a standardized benchmark dataset for testing the pipeline:
@@ -115,7 +115,7 @@ Optional one-page text: `python scripts/export_results_one_page.py --metrics out
 
 ## Relation to public benchmarks (“SOTA”) — honest positioning
 
-**Academic positioning:** This work targets **ubiquitous computing / mobile sensing protocol design** (how to define the task, splits, and baselines on commodity phones) **rather than model optimization** or a new SOTA network.
+**Academic positioning:** **This work focuses on protocol design in ubiquitous sensing rather than model benchmarking**—same framing as the **Global positioning** line at the top of this README.
 
 This repository is **not** a drop-in reproduction of a single published leaderboard. Recordings under `data_sensor/row` are **custom phone sessions** (pocket/hand, mixed ADL, optional barometer), evaluated **per sliding window** (and optionally **3-class** disambiguation). That protocol differs from most wearable fall-detection papers, which often use **waist-mounted** accelerometers, **different sampling rates**, and public sets such as **SisFall**, **UR Fall Detection Dataset**, **MobFall**, or **KFall** (names vary by survey; pick the set closest to your sensor placement when you cite).
 
@@ -137,7 +137,7 @@ Fall detection from a **phone in the pocket or hand** (wrist-like motion is a sp
 ## System Implications
 **Latency and deployment:** Sliding-window inference adds batch predict time per window; `metrics.json` records average milliseconds per test window for threshold, LR, and RF baselines—use these numbers for edge versus cloud discussions (Core ML export is supported from the chosen RF checkpoint). **Privacy:** On-device inference avoids streaming raw sensor traces to a server, which matters for home monitoring. **Robustness:** Barometer-assisted logic (`main_offline` / dual-track path) targets height and posture context; missing or noisy barometer channels change false alarm trade-offs. **Scope:** This repository implements research and engineering prototypes; it is **not** a certified medical device and should not be presented as clinical validation without protocol, ethics review, and regulated study design.
 
-##  Data Schema
+## 📈 Data Schema
 The system expects standardized CSV inputs with the following fields:
 | Column | Unit | Description |
 | :--- | :--- | :--- |
