@@ -37,7 +37,7 @@
     }
   },
   "roc_auc": 1.0,
-  "n_runs": 5,
+  "n_runs": 1,
   "runs": [
     {
       "seed": 42,
@@ -49,6 +49,7 @@
       },
       "n_windows_train": 70,
       "n_windows_test": 125,
+      "task": "binary",
       "random_forest": {
         "confusion_matrix": [
           [
@@ -63,8 +64,8 @@
         "macro_f1": 1.0,
         "fall_f1": 1.0,
         "roc_auc": 1.0,
-        "latency_ms_total": 29.59610000016255,
-        "latency_ms_per_window_avg": 0.2367688000013004
+        "latency_ms_total": 42.26270000071963,
+        "latency_ms_per_window_avg": 0.33810160000575706
       },
       "logistic_regression": {
         "skipped": false,
@@ -83,8 +84,8 @@
         "macro_f1": 1.0,
         "fall_f1": 1.0,
         "roc_auc": 1.0,
-        "latency_ms_total": 0.12939999987793271,
-        "latency_ms_per_window_avg": 0.0010351999990234617
+        "latency_ms_total": 0.19690000044647604,
+        "latency_ms_per_window_avg": 0.0015752000035718083
       },
       "baseline_peak_acc": {
         "skipped": false,
@@ -105,313 +106,17 @@
         "fall_f1": 1.0
       },
       "latency_ms_on_test_windows": {
-        "random_forest_total": 29.59610000016255,
-        "random_forest_per_window_avg": 0.2367688000013004,
-        "baseline_total": 0.004499999704421498,
-        "baseline_per_window_avg": 3.599999763537198e-05,
-        "logistic_regression_total": 0.12939999987793271,
-        "logistic_regression_per_window_avg": 0.0010351999990234617
-      }
-    },
-    {
-      "seed": 43,
-      "split_meta": {
-        "split_policy": "neg_session_group_shuffle_and_fall_chronological",
-        "fall_time_train_ratio": 0.75,
-        "n_fall_windows_train": 2,
-        "n_fall_windows_test": 1
-      },
-      "n_windows_train": 158,
-      "n_windows_test": 37,
-      "random_forest": {
-        "confusion_matrix": [
-          [
-            36,
-            0
-          ],
-          [
-            0,
-            1
-          ]
-        ],
-        "macro_f1": 1.0,
-        "fall_f1": 1.0,
-        "roc_auc": 1.0,
-        "latency_ms_total": 28.15790000022389,
-        "latency_ms_per_window_avg": 0.7610243243303754
-      },
-      "logistic_regression": {
-        "skipped": false,
-        "name": "logistic_regression_scaled",
-        "description": "StandardScaler on window features + sklearn LogisticRegression(class_weight=balanced).",
-        "confusion_matrix": [
-          [
-            36,
-            0
-          ],
-          [
-            0,
-            1
-          ]
-        ],
-        "macro_f1": 1.0,
-        "fall_f1": 1.0,
-        "roc_auc": 1.0,
-        "latency_ms_total": 0.1250999998774205,
-        "latency_ms_per_window_avg": 0.003381081077768121
-      },
-      "baseline_peak_acc": {
-        "skipped": false,
-        "name": "peak_acc_vector_max_norm_threshold",
-        "description": "Binary pred: sqrt(acc_x_max^2+acc_y_max^2+acc_z_max^2) >= T. T fit on train windows only to maximize F1 (positive class = fall).",
-        "threshold_fit_on_train": 76.80687006591708,
-        "confusion_matrix": [
-          [
-            36,
-            0
-          ],
-          [
-            0,
-            1
-          ]
-        ],
-        "macro_f1": 1.0,
-        "fall_f1": 1.0
-      },
-      "latency_ms_on_test_windows": {
-        "random_forest_total": 28.15790000022389,
-        "random_forest_per_window_avg": 0.7610243243303754,
-        "baseline_total": 0.0031999998100218363,
-        "baseline_per_window_avg": 8.648648135194153e-05,
-        "logistic_regression_total": 0.1250999998774205,
-        "logistic_regression_per_window_avg": 0.003381081077768121
-      }
-    },
-    {
-      "seed": 44,
-      "split_meta": {
-        "split_policy": "neg_session_group_shuffle_and_fall_chronological",
-        "fall_time_train_ratio": 0.75,
-        "n_fall_windows_train": 2,
-        "n_fall_windows_test": 1
-      },
-      "n_windows_train": 65,
-      "n_windows_test": 130,
-      "random_forest": {
-        "confusion_matrix": [
-          [
-            129,
-            0
-          ],
-          [
-            0,
-            1
-          ]
-        ],
-        "macro_f1": 1.0,
-        "fall_f1": 1.0,
-        "roc_auc": 1.0,
-        "latency_ms_total": 27.31709999989107,
-        "latency_ms_per_window_avg": 0.21013153846070054
-      },
-      "logistic_regression": {
-        "skipped": false,
-        "name": "logistic_regression_scaled",
-        "description": "StandardScaler on window features + sklearn LogisticRegression(class_weight=balanced).",
-        "confusion_matrix": [
-          [
-            126,
-            3
-          ],
-          [
-            0,
-            1
-          ]
-        ],
-        "macro_f1": 0.6941176470588235,
-        "fall_f1": 0.4,
-        "roc_auc": 1.0,
-        "latency_ms_total": 0.11660000018309802,
-        "latency_ms_per_window_avg": 0.0008969230783315232
-      },
-      "baseline_peak_acc": {
-        "skipped": false,
-        "name": "peak_acc_vector_max_norm_threshold",
-        "description": "Binary pred: sqrt(acc_x_max^2+acc_y_max^2+acc_z_max^2) >= T. T fit on train windows only to maximize F1 (positive class = fall).",
-        "threshold_fit_on_train": 46.329222783098075,
-        "confusion_matrix": [
-          [
-            126,
-            3
-          ],
-          [
-            0,
-            1
-          ]
-        ],
-        "macro_f1": 0.6941176470588235,
-        "fall_f1": 0.4
-      },
-      "latency_ms_on_test_windows": {
-        "random_forest_total": 27.31709999989107,
-        "random_forest_per_window_avg": 0.21013153846070054,
-        "baseline_total": 0.003099999958067201,
-        "baseline_per_window_avg": 2.3846153523593854e-05,
-        "logistic_regression_total": 0.11660000018309802,
-        "logistic_regression_per_window_avg": 0.0008969230783315232
-      }
-    },
-    {
-      "seed": 45,
-      "split_meta": {
-        "split_policy": "neg_session_group_shuffle_and_fall_chronological",
-        "fall_time_train_ratio": 0.75,
-        "n_fall_windows_train": 2,
-        "n_fall_windows_test": 1
-      },
-      "n_windows_train": 65,
-      "n_windows_test": 130,
-      "random_forest": {
-        "confusion_matrix": [
-          [
-            129,
-            0
-          ],
-          [
-            0,
-            1
-          ]
-        ],
-        "macro_f1": 1.0,
-        "fall_f1": 1.0,
-        "roc_auc": 1.0,
-        "latency_ms_total": 28.010200000153418,
-        "latency_ms_per_window_avg": 0.21546307692425706
-      },
-      "logistic_regression": {
-        "skipped": false,
-        "name": "logistic_regression_scaled",
-        "description": "StandardScaler on window features + sklearn LogisticRegression(class_weight=balanced).",
-        "confusion_matrix": [
-          [
-            126,
-            3
-          ],
-          [
-            0,
-            1
-          ]
-        ],
-        "macro_f1": 0.6941176470588235,
-        "fall_f1": 0.4,
-        "roc_auc": 1.0,
-        "latency_ms_total": 0.17860000025393674,
-        "latency_ms_per_window_avg": 0.0013738461557995134
-      },
-      "baseline_peak_acc": {
-        "skipped": false,
-        "name": "peak_acc_vector_max_norm_threshold",
-        "description": "Binary pred: sqrt(acc_x_max^2+acc_y_max^2+acc_z_max^2) >= T. T fit on train windows only to maximize F1 (positive class = fall).",
-        "threshold_fit_on_train": 46.329222783098075,
-        "confusion_matrix": [
-          [
-            126,
-            3
-          ],
-          [
-            0,
-            1
-          ]
-        ],
-        "macro_f1": 0.6941176470588235,
-        "fall_f1": 0.4
-      },
-      "latency_ms_on_test_windows": {
-        "random_forest_total": 28.010200000153418,
-        "random_forest_per_window_avg": 0.21546307692425706,
-        "baseline_total": 0.0028999997994105797,
-        "baseline_per_window_avg": 2.2307690764696767e-05,
-        "logistic_regression_total": 0.17860000025393674,
-        "logistic_regression_per_window_avg": 0.0013738461557995134
-      }
-    },
-    {
-      "seed": 46,
-      "split_meta": {
-        "split_policy": "neg_session_group_shuffle_and_fall_chronological",
-        "fall_time_train_ratio": 0.75,
-        "n_fall_windows_train": 2,
-        "n_fall_windows_test": 1
-      },
-      "n_windows_train": 190,
-      "n_windows_test": 5,
-      "random_forest": {
-        "confusion_matrix": [
-          [
-            4,
-            0
-          ],
-          [
-            0,
-            1
-          ]
-        ],
-        "macro_f1": 1.0,
-        "fall_f1": 1.0,
-        "roc_auc": 1.0,
-        "latency_ms_total": 26.90130000019053,
-        "latency_ms_per_window_avg": 5.380260000038106
-      },
-      "logistic_regression": {
-        "skipped": false,
-        "name": "logistic_regression_scaled",
-        "description": "StandardScaler on window features + sklearn LogisticRegression(class_weight=balanced).",
-        "confusion_matrix": [
-          [
-            4,
-            0
-          ],
-          [
-            0,
-            1
-          ]
-        ],
-        "macro_f1": 1.0,
-        "fall_f1": 1.0,
-        "roc_auc": 1.0,
-        "latency_ms_total": 0.13020000005781185,
-        "latency_ms_per_window_avg": 0.02604000001156237
-      },
-      "baseline_peak_acc": {
-        "skipped": false,
-        "name": "peak_acc_vector_max_norm_threshold",
-        "description": "Binary pred: sqrt(acc_x_max^2+acc_y_max^2+acc_z_max^2) >= T. T fit on train windows only to maximize F1 (positive class = fall).",
-        "threshold_fit_on_train": 74.42876961654319,
-        "confusion_matrix": [
-          [
-            1,
-            3
-          ],
-          [
-            0,
-            1
-          ]
-        ],
-        "macro_f1": 0.4,
-        "fall_f1": 0.4
-      },
-      "latency_ms_on_test_windows": {
-        "random_forest_total": 26.90130000019053,
-        "random_forest_per_window_avg": 5.380260000038106,
-        "baseline_total": 0.0021999999262334313,
-        "baseline_per_window_avg": 0.00043999998524668626,
-        "logistic_regression_total": 0.13020000005781185,
-        "logistic_regression_per_window_avg": 0.02604000001156237
+        "random_forest_total": 42.26270000071963,
+        "random_forest_per_window_avg": 0.33810160000575706,
+        "baseline_total": 0.004700001227320172,
+        "baseline_per_window_avg": 3.7600009818561375e-05,
+        "logistic_regression_total": 0.19690000044647604,
+        "logistic_regression_per_window_avg": 0.0015752000035718083
       }
     }
   ],
   "aggregate_mean_std": {
-    "n_runs": 5,
+    "n_runs": 1,
     "random_forest": {
       "skipped": false,
       "macro_f1_mean": 1.0,
@@ -420,30 +125,66 @@
       "fall_f1_std": 0.0,
       "roc_auc_mean": 1.0,
       "roc_auc_std": 0.0,
-      "latency_ms_per_window_avg_mean": 1.360729547950948,
-      "latency_ms_per_window_avg_std": 2.020646938112949
+      "latency_ms_per_window_avg_mean": 0.33810160000575706,
+      "latency_ms_per_window_avg_std": 0.0
     },
     "logistic_regression": {
       "skipped": false,
-      "macro_f1_mean": 0.8776470588235294,
-      "macro_f1_std": 0.14985113720555912,
-      "fall_f1_mean": 0.76,
-      "fall_f1_std": 0.29393876913398137,
+      "macro_f1_mean": 1.0,
+      "macro_f1_std": 0.0,
+      "fall_f1_mean": 1.0,
+      "fall_f1_std": 0.0,
       "roc_auc_mean": 1.0,
       "roc_auc_std": 0.0,
-      "latency_ms_per_window_avg_mean": 0.006545410064496998,
-      "latency_ms_per_window_avg_std": 0.009788410581915164
+      "latency_ms_per_window_avg_mean": 0.0015752000035718083,
+      "latency_ms_per_window_avg_std": 0.0
     },
     "baseline_peak_acc": {
       "skipped": false,
-      "macro_f1_mean": 0.7576470588235295,
-      "macro_f1_std": 0.225145858144107,
-      "fall_f1_mean": 0.6399999999999999,
-      "fall_f1_std": 0.29393876913398137,
-      "latency_ms_per_window_avg_mean": 0.00012172806170445808,
-      "latency_ms_per_window_avg_std": 0.00016084375361012502
+      "macro_f1_mean": 1.0,
+      "macro_f1_std": 0.0,
+      "fall_f1_mean": 1.0,
+      "fall_f1_std": 0.0,
+      "latency_ms_per_window_avg_mean": 3.7600009818561375e-05,
+      "latency_ms_per_window_avg_std": 0.0
     }
   },
+  "method_hierarchy": [
+    {
+      "order": 1,
+      "method": "Threshold",
+      "tier": "heuristic",
+      "implementation": "peak_acc_vector_max_norm_threshold",
+      "macro_f1_mean": 1.0,
+      "macro_f1_std": 0.0,
+      "fall_f1_mean": 1.0,
+      "fall_f1_std": 0.0
+    },
+    {
+      "order": 2,
+      "method": "Logistic Regression",
+      "tier": "classical_ml",
+      "implementation": "sklearn LogisticRegression + StandardScaler",
+      "macro_f1_mean": 1.0,
+      "macro_f1_std": 0.0,
+      "fall_f1_mean": 1.0,
+      "fall_f1_std": 0.0,
+      "roc_auc_mean": 1.0,
+      "roc_auc_std": 0.0
+    },
+    {
+      "order": 3,
+      "method": "Random Forest",
+      "tier": "advanced_ml",
+      "implementation": "sklearn RandomForestClassifier",
+      "macro_f1_mean": 1.0,
+      "macro_f1_std": 0.0,
+      "fall_f1_mean": 1.0,
+      "fall_f1_std": 0.0,
+      "roc_auc_mean": 1.0,
+      "roc_auc_std": 0.0
+    }
+  ],
   "best_run_by_random_forest_macro_f1": {
     "seed": 42,
     "split_meta": {
@@ -454,6 +195,7 @@
     },
     "n_windows_train": 70,
     "n_windows_test": 125,
+    "task": "binary",
     "random_forest": {
       "confusion_matrix": [
         [
@@ -468,8 +210,8 @@
       "macro_f1": 1.0,
       "fall_f1": 1.0,
       "roc_auc": 1.0,
-      "latency_ms_total": 29.59610000016255,
-      "latency_ms_per_window_avg": 0.2367688000013004
+      "latency_ms_total": 42.26270000071963,
+      "latency_ms_per_window_avg": 0.33810160000575706
     },
     "logistic_regression": {
       "skipped": false,
@@ -488,8 +230,8 @@
       "macro_f1": 1.0,
       "fall_f1": 1.0,
       "roc_auc": 1.0,
-      "latency_ms_total": 0.12939999987793271,
-      "latency_ms_per_window_avg": 0.0010351999990234617
+      "latency_ms_total": 0.19690000044647604,
+      "latency_ms_per_window_avg": 0.0015752000035718083
     },
     "baseline_peak_acc": {
       "skipped": false,
@@ -510,12 +252,12 @@
       "fall_f1": 1.0
     },
     "latency_ms_on_test_windows": {
-      "random_forest_total": 29.59610000016255,
-      "random_forest_per_window_avg": 0.2367688000013004,
-      "baseline_total": 0.004499999704421498,
-      "baseline_per_window_avg": 3.599999763537198e-05,
-      "logistic_regression_total": 0.12939999987793271,
-      "logistic_regression_per_window_avg": 0.0010351999990234617
+      "random_forest_total": 42.26270000071963,
+      "random_forest_per_window_avg": 0.33810160000575706,
+      "baseline_total": 0.004700001227320172,
+      "baseline_per_window_avg": 3.7600009818561375e-05,
+      "logistic_regression_total": 0.19690000044647604,
+      "logistic_regression_per_window_avg": 0.0015752000035718083
     }
   },
   "baseline_vs_rf_same_test_split": {
@@ -524,16 +266,16 @@
       "macro_f1": 1.0,
       "fall_f1": 1.0,
       "roc_auc": 1.0,
-      "latency_ms_total": 29.59610000016255,
-      "latency_ms_per_window_avg": 0.2367688000013004
+      "latency_ms_total": 42.26270000071963,
+      "latency_ms_per_window_avg": 0.33810160000575706
     },
     "latency_ms_on_test_windows": {
-      "random_forest_total": 29.59610000016255,
-      "random_forest_per_window_avg": 0.2367688000013004,
-      "baseline_total": 0.004499999704421498,
-      "baseline_per_window_avg": 3.599999763537198e-05,
-      "logistic_regression_total": 0.12939999987793271,
-      "logistic_regression_per_window_avg": 0.0010351999990234617
+      "random_forest_total": 42.26270000071963,
+      "random_forest_per_window_avg": 0.33810160000575706,
+      "baseline_total": 0.004700001227320172,
+      "baseline_per_window_avg": 3.7600009818561375e-05,
+      "logistic_regression_total": 0.19690000044647604,
+      "logistic_regression_per_window_avg": 0.0015752000035718083
     },
     "baseline": {
       "skipped": false,
@@ -570,8 +312,8 @@
       "macro_f1": 1.0,
       "fall_f1": 1.0,
       "roc_auc": 1.0,
-      "latency_ms_total": 0.12939999987793271,
-      "latency_ms_per_window_avg": 0.0010351999990234617
+      "latency_ms_total": 0.19690000044647604,
+      "latency_ms_per_window_avg": 0.0015752000035718083
     }
   }
 }

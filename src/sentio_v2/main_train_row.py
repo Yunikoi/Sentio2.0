@@ -1,4 +1,4 @@
-"""Train a binary fall classifier on data_sensor/row (AdultManFall = 1, all else = 0)."""
+"""Train a fall classifier on data_sensor/row: binary (person fall vs rest) or 3-class disambiguation."""
 
 from __future__ import annotations
 
@@ -17,7 +17,14 @@ from sklearn.metrics import classification_report, confusion_matrix, f1_score, r
 from sklearn.model_selection import GroupShuffleSplit
 from sklearn.preprocessing import StandardScaler
 
-from .row_loader import FALL_ACTIVITY, list_row_sessions
+from .row_loader import (
+    FALL_ACTIVITY,
+    MULTICLASS_ADL,
+    MULTICLASS_PERSON_FALL,
+    MULTICLASS_PHONE_DROP,
+    PHONE_DROP_ACTIVITY,
+    list_row_sessions,
+)
 from .row_session import load_fused_session
 from .row_windows import build_window_dataset
 
@@ -86,8 +93,11 @@ def _print_run_line(tag: str, scores: Dict[str, float], roc_auc_val, latency_ms_
         if roc_auc_val is not None and roc_auc_val == roc_auc_val
         else "n/a"
     )
+    extra = ""
+    if "phone_drop_f1" in scores:
+        extra = f" phone_drop_f1={scores['phone_drop_f1']:.4f}"
     print(
-        f"[{tag}] macro_f1={scores['macro_f1']:.4f} fall_f1={scores['fall_f1']:.4f} "
+        f"[{tag}] macro_f1={scores['macro_f1']:.4f} fall_f1={scores['fall_f1']:.4f}{extra} "
         f"roc_auc={auc_s} latency_ms_per_window_avg={latency_ms_per:.4f}"
     )
 
@@ -147,7 +157,13 @@ def _print_method_hierarchy_summary(seeds: List[int], aggregate: Dict[str, Any])
         mm, ms = b["macro_f1_mean"], b["macro_f1_std"]
         fm, fs = b["fall_f1_mean"], b["fall_f1_std"]
         print(f"  {label}")
+        phone_part = ""
+        if "phone_drop_f1_mean" in b:
+            pm, ps = b["phone_drop_f1_mean"], b["phone_drop_f1_std"]
+            phone_part = f"    phone-drop-F1: {pm:.2f} ± {ps:.2f}"
         print(f"    macro-F1: {mm:.2f} ± {ms:.2f}    fall-F1: {fm:.2f} ± {fs:.2f}")
+        if phone_part:
+            print(phone_part)
     print(sep)
     one: List[str] = []
     bl = aggregate.get("baseline_peak_acc", {})
@@ -232,6 +248,72 @@ def _train_test_indices(
     return train_idx, test_idx, meta
 
 
+def _chronological_split_window_idx(sub_df: pd.DataFrame, train_ratio: float) -> tuple[np.ndarray, np.ndarray]:
+    if sub_df.empty:
+        return np.array([], dtype=int), np.array([], dtype=int)
+    ordered = sub_df.sort_values("window_t_mid")
+    idx = ordered.index.to_numpy()
+    n = len(idx)
+    if n < 2:
+        return idx, np.array([], dtype=int)
+    split_at = max(1, min(n - 1, int(round(n * train_ratio))))
+    return idx[:split_at], idx[split_at:]
+
+
+def _train_test_indices_multiclass(
+    win_df: pd.DataFrame,
+    test_size: float,
+    seed: int,
+    rare_class_train_ratio: float,
+) -> tuple[np.ndarray, np.ndarray, dict]:
+    """ADL windows: group shuffle by session. Person-fall and phone-drop: chronological split per class."""
+    meta: dict = {
+        "split_policy": "multiclass_adl_group_shuffle_rare_chronological",
+        "rare_class_train_ratio": float(rare_class_train_ratio),
+    }
+    mc = win_df["multiclass"].to_numpy(dtype=int)
+    pf_tr, pf_te = _chronological_split_window_idx(
+        win_df.loc[mc == MULTICLASS_PERSON_FALL], rare_class_train_ratio
+    )
+    ph_tr, ph_te = _chronological_split_window_idx(
+        win_df.loc[mc == MULTICLASS_PHONE_DROP], rare_class_train_ratio
+    )
+    meta["n_person_fall_windows_train"] = int(len(pf_tr))
+    meta["n_person_fall_windows_test"] = int(len(pf_te))
+    meta["n_phone_drop_windows_train"] = int(len(ph_tr))
+    meta["n_phone_drop_windows_test"] = int(len(ph_te))
+
+    neg_df = win_df.loc[mc == MULTICLASS_ADL]
+    if neg_df.empty:
+        meta["neg_split_note"] = "no ADL windows"
+        train_idx = np.unique(np.concatenate([pf_tr, ph_tr]))
+        test_idx = np.unique(np.concatenate([pf_te, ph_te]))
+        return train_idx, test_idx, meta
+
+    exclude = {"label", "session_group", "window_t_mid", "multiclass"}
+    feat_cols = [c for c in neg_df.columns if c not in exclude]
+    Xn = neg_df[feat_cols]
+    yn = neg_df["multiclass"].to_numpy()
+    gn = neg_df["session_group"].to_numpy()
+    gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)
+    neg_tr_rel, neg_te_rel = next(gss.split(Xn, yn, gn))
+    neg_train_idx = neg_df.index[neg_tr_rel].to_numpy()
+    neg_test_idx = neg_df.index[neg_te_rel].to_numpy()
+
+    train_idx = np.unique(np.concatenate([pf_tr, ph_tr, neg_train_idx]))
+    test_idx = np.unique(np.concatenate([pf_te, ph_te, neg_test_idx]))
+    return train_idx, test_idx, meta
+
+
+def _multiclass_scalar_scores(report: dict) -> Dict[str, float]:
+    return {
+        "macro_f1": float(report["macro avg"]["f1-score"]),
+        "fall_f1": float(report["1"]["f1-score"]) if "1" in report else 0.0,
+        "phone_drop_f1": float(report["2"]["f1-score"]) if "2" in report else 0.0,
+        "adl_f1": float(report["0"]["f1-score"]) if "0" in report else 0.0,
+    }
+
+
 def _estimate_imu_hz(df: pd.DataFrame) -> float:
     t = df["t"].to_numpy(dtype=float)
     if len(t) < 2:
@@ -251,7 +333,7 @@ def _safe_roc_auc(y_true: np.ndarray, proba: np.ndarray) -> Optional[float]:
         return None
 
 
-def evaluate_one_seed(
+def _evaluate_one_seed_binary(
     win_df: pd.DataFrame,
     feature_cols: List[str],
     test_size: float,
@@ -363,6 +445,7 @@ def evaluate_one_seed(
         "split_meta": split_meta,
         "n_windows_train": int(len(train_idx)),
         "n_windows_test": n_te,
+        "task": "binary",
         "random_forest": {
             "confusion_matrix": cm_rf,
             **_report_scalar_scores(report_rf),
@@ -382,6 +465,157 @@ def evaluate_one_seed(
         },
     }
     return run_out, clf, clf_lr, scaler
+
+
+def _evaluate_one_seed_multiclass(
+    win_df: pd.DataFrame,
+    feature_cols: List[str],
+    test_size: float,
+    rare_class_train_ratio: float,
+    seed: int,
+) -> Tuple[dict, RandomForestClassifier, Optional[LogisticRegression], Optional[StandardScaler]]:
+    train_idx, test_idx, split_meta = _train_test_indices_multiclass(
+        win_df,
+        test_size=test_size,
+        seed=seed,
+        rare_class_train_ratio=rare_class_train_ratio,
+    )
+    X_tr = win_df.loc[train_idx, feature_cols]
+    X_te = win_df.loc[test_idx, feature_cols]
+    y_tr = win_df.loc[train_idx, "multiclass"].to_numpy(dtype=int)
+    y_te = win_df.loc[test_idx, "multiclass"].to_numpy(dtype=int)
+    n_te = int(len(X_te))
+
+    clf = RandomForestClassifier(
+        n_estimators=200,
+        max_depth=None,
+        class_weight="balanced_subsample",
+        random_state=seed,
+        n_jobs=-1,
+    )
+    clf.fit(X_tr, y_tr)
+    t_rf0 = time.perf_counter()
+    pred = clf.predict(X_te)
+    rf_total_ms = (time.perf_counter() - t_rf0) * 1000.0
+    rf_per_ms = rf_total_ms / max(1, n_te)
+
+    report_rf = classification_report(y_te, pred, output_dict=True, zero_division=0, labels=[0, 1, 2])
+    cm_rf = confusion_matrix(y_te, pred, labels=[0, 1, 2]).tolist()
+    scalars_rf = _multiclass_scalar_scores(report_rf)
+    try:
+        roc_rf = float(
+            roc_auc_score(
+                y_te,
+                clf.predict_proba(X_te),
+                multi_class="ovr",
+                average="macro",
+                labels=list(clf.classes_),
+            )
+        )
+    except (ValueError, TypeError):
+        roc_rf = None
+
+    baseline_block: dict = {
+        "skipped": True,
+        "reason": (
+            "Multiclass task: peak-acceleration threshold baseline is for binary person-fall vs rest only."
+        ),
+    }
+
+    clf_lr: Optional[LogisticRegression] = None
+    scaler: Optional[StandardScaler] = None
+    lr_block: dict = {"skipped": True, "reason": "not fit"}
+    lr_total_ms = 0.0
+    lr_per_ms = 0.0
+    roc_lr: Optional[float] = None
+    try:
+        scaler = StandardScaler()
+        X_trs = scaler.fit_transform(X_tr.to_numpy(dtype=np.float64))
+        X_tes = scaler.transform(X_te.to_numpy(dtype=np.float64))
+        clf_lr = LogisticRegression(
+            max_iter=2500,
+            class_weight="balanced",
+            random_state=seed,
+            solver="lbfgs",
+        )
+        clf_lr.fit(X_trs, y_tr)
+        t_lr0 = time.perf_counter()
+        pred_lr = clf_lr.predict(X_tes)
+        lr_total_ms = (time.perf_counter() - t_lr0) * 1000.0
+        lr_per_ms = lr_total_ms / max(1, n_te)
+        report_lr = classification_report(y_te, pred_lr, output_dict=True, zero_division=0, labels=[0, 1, 2])
+        cm_lr = confusion_matrix(y_te, pred_lr, labels=[0, 1, 2]).tolist()
+        scalars_lr = _multiclass_scalar_scores(report_lr)
+        try:
+            roc_lr = float(
+                roc_auc_score(
+                    y_te,
+                    clf_lr.predict_proba(X_tes),
+                    multi_class="ovr",
+                    average="macro",
+                    labels=list(clf_lr.classes_),
+                )
+            )
+        except (ValueError, TypeError):
+            roc_lr = None
+        lr_block = {
+            "skipped": False,
+            "name": "logistic_regression_multiclass_scaled",
+            "description": (
+                "StandardScaler + sklearn LogisticRegression(solver=lbfgs) for classes: "
+                "0=ADL, 1=person fall, 2=phone drop."
+            ),
+            "confusion_matrix": cm_lr,
+            **scalars_lr,
+            "roc_auc": roc_lr,
+            "latency_ms_total": lr_total_ms,
+            "latency_ms_per_window_avg": lr_per_ms,
+        }
+    except ValueError as e:
+        lr_block = {"skipped": True, "reason": f"logistic_regression: {e}"}
+        clf_lr = None
+        scaler = None
+
+    run_out = {
+        "seed": int(seed),
+        "split_meta": split_meta,
+        "n_windows_train": int(len(train_idx)),
+        "n_windows_test": n_te,
+        "task": "multiclass",
+        "random_forest": {
+            "confusion_matrix": cm_rf,
+            **scalars_rf,
+            "roc_auc": roc_rf,
+            "latency_ms_total": rf_total_ms,
+            "latency_ms_per_window_avg": rf_per_ms,
+        },
+        "logistic_regression": lr_block,
+        "baseline_peak_acc": baseline_block,
+        "latency_ms_on_test_windows": {
+            "random_forest_total": rf_total_ms,
+            "random_forest_per_window_avg": rf_per_ms,
+            "baseline_total": 0.0,
+            "baseline_per_window_avg": 0.0,
+            "logistic_regression_total": lr_total_ms,
+            "logistic_regression_per_window_avg": lr_per_ms,
+        },
+    }
+    return run_out, clf, clf_lr, scaler
+
+
+def evaluate_one_seed(
+    win_df: pd.DataFrame,
+    feature_cols: List[str],
+    test_size: float,
+    fall_time_train_ratio: float,
+    seed: int,
+    task: str = "binary",
+) -> Tuple[dict, RandomForestClassifier, Optional[LogisticRegression], Optional[StandardScaler]]:
+    if task == "multiclass":
+        return _evaluate_one_seed_multiclass(
+            win_df, feature_cols, test_size, fall_time_train_ratio, seed
+        )
+    return _evaluate_one_seed_binary(win_df, feature_cols, test_size, fall_time_train_ratio, seed)
 
 
 def _mean_std(vals: List[float]) -> Tuple[float, float]:
@@ -436,6 +670,11 @@ def _aggregate_from_runs(runs: List[dict]) -> dict:
             "fall_f1_mean": _mean_std(ff)[0],
             "fall_f1_std": _mean_std(ff)[1],
         }
+        pdf = collect([prefix, "phone_drop_f1"])
+        if pdf:
+            pm, ps = _mean_std(pdf)
+            out["phone_drop_f1_mean"] = pm
+            out["phone_drop_f1_std"] = ps
         if roc:
             rm, rs = _mean_std(roc)
             out["roc_auc_mean"] = rm
@@ -491,6 +730,16 @@ def main() -> None:
     )
     parser.add_argument("--out-dir", type=Path, default=Path("outputs/ml_row"))
     parser.add_argument(
+        "--task",
+        type=str,
+        choices=("binary", "multiclass"),
+        default="binary",
+        help=(
+            "binary: AdultManFall=1 vs all else=0. "
+            "multiclass: 0=ADL, 1=person fall (AdultManFall), 2=phone drop (IndoorPhoneFall)."
+        ),
+    )
+    parser.add_argument(
         "--export-coreml",
         action="store_true",
         help="After training, export Core ML to --coreml-out-dir (needs coremltools + joblib)",
@@ -514,6 +763,7 @@ def main() -> None:
     skipped = 0
     n_fall_sessions = 0
     n_neg_sessions = 0
+    n_phone_drop_sessions = 0
     for s in sessions:
         df = load_fused_session(s)
         if df is None:
@@ -522,6 +772,8 @@ def main() -> None:
         fused.append(df)
         if s.label == 1:
             n_fall_sessions += 1
+        elif s.multiclass == MULTICLASS_PHONE_DROP:
+            n_phone_drop_sessions += 1
         else:
             n_neg_sessions += 1
 
@@ -536,7 +788,9 @@ def main() -> None:
     if win_df.empty:
         raise SystemExit("Window dataset empty; shorten --window-sec or add longer clips")
 
-    feature_cols = [c for c in win_df.columns if c not in ("label", "session_group", "window_t_mid")]
+    feature_cols = [
+        c for c in win_df.columns if c not in ("label", "multiclass", "session_group", "window_t_mid")
+    ]
 
     n_runs = max(1, int(args.n_runs))
     seeds = [int(args.seed + i) for i in range(n_runs)]
@@ -554,6 +808,7 @@ def main() -> None:
             test_size=args.test_size,
             fall_time_train_ratio=args.fall_train_ratio,
             seed=seed,
+            task=args.task,
         )
         runs.append(run_out)
         mf = float(run_out["random_forest"]["macro_f1"])
@@ -569,12 +824,21 @@ def main() -> None:
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     meta = {
+        "task": args.task,
         "fall_activity_folder": FALL_ACTIVITY,
+        "phone_drop_activity_folder": PHONE_DROP_ACTIVITY,
+        "multiclass_legend": {
+            "0": "ADL",
+            "1": f"person_fall ({FALL_ACTIVITY})",
+            "2": f"phone_drop ({PHONE_DROP_ACTIVITY})",
+        },
         "label_rule": f"label=1 iff activity folder name == {FALL_ACTIVITY!r}; all other folders label=0",
         "sessions_total": len(sessions),
         "sessions_skipped_missing_imu": skipped,
         "sessions_fall_used": int(n_fall_sessions),
-        "sessions_nonfall_used": int(n_neg_sessions),
+        "sessions_phone_drop_used": int(n_phone_drop_sessions),
+        "sessions_adl_used": int(n_neg_sessions),
+        "sessions_nonfall_used": int(n_neg_sessions + n_phone_drop_sessions),
         "estimated_imu_hz_median": float(hz),
         "window_samples": int(window_samples),
         "hop_samples": int(hop_samples),
@@ -585,6 +849,7 @@ def main() -> None:
         "artifact_run_index": int(best_run_idx),
         "artifact_seed": int(best_seed),
         "warning_single_fall_session": bool(n_fall_sessions <= 1),
+        "warning_single_phone_drop_session": bool(n_phone_drop_sessions <= 1),
     }
     with open(args.out_dir / "train_meta.json", "w", encoding="utf-8") as f:
         json.dump(meta, f, indent=2, ensure_ascii=False)
@@ -609,34 +874,55 @@ def main() -> None:
         },
     }
     # Rebuild classification_report dict for best run RF (for tools expecting full report)
-    train_idx, test_idx, _ = _train_test_indices(
-        win_df,
-        test_size=args.test_size,
-        seed=best_seed,
-        fall_time_train_ratio=args.fall_train_ratio,
-    )
-    X_te = win_df.loc[test_idx, feature_cols]
-    y_te = win_df.loc[test_idx, "label"].to_numpy(dtype=int)
-    pred_best = (_fall_class_proba(best_clf, X_te) >= 0.5).astype(int)
-    out_metrics["classification_report"] = classification_report(
-        y_te, pred_best, output_dict=True, zero_division=0, labels=[0, 1]
-    )
+    if args.task == "multiclass":
+        train_idx, test_idx, _ = _train_test_indices_multiclass(
+            win_df,
+            test_size=args.test_size,
+            seed=best_seed,
+            rare_class_train_ratio=args.fall_train_ratio,
+        )
+        X_te = win_df.loc[test_idx, feature_cols]
+        y_te = win_df.loc[test_idx, "multiclass"].to_numpy(dtype=int)
+        pred_best = best_clf.predict(X_te)
+        out_metrics["classification_report"] = classification_report(
+            y_te, pred_best, output_dict=True, zero_division=0, labels=[0, 1, 2]
+        )
+    else:
+        train_idx, test_idx, _ = _train_test_indices(
+            win_df,
+            test_size=args.test_size,
+            seed=best_seed,
+            fall_time_train_ratio=args.fall_train_ratio,
+        )
+        X_te = win_df.loc[test_idx, feature_cols]
+        y_te = win_df.loc[test_idx, "label"].to_numpy(dtype=int)
+        pred_best = (_fall_class_proba(best_clf, X_te) >= 0.5).astype(int)
+        out_metrics["classification_report"] = classification_report(
+            y_te, pred_best, output_dict=True, zero_division=0, labels=[0, 1]
+        )
 
     with open(args.out_dir / "metrics.json", "w", encoding="utf-8") as f:
         json.dump(out_metrics, f, indent=2, ensure_ascii=False)
 
+    model_stem = "fall_rf_row_multiclass" if args.task == "multiclass" else "fall_rf_row"
     try:
         import joblib
     except ImportError:  # pragma: no cover
         import pickle
 
-        model_path = args.out_dir / "fall_rf_row.pkl"
+        model_path = args.out_dir / f"{model_stem}.pkl"
         with open(model_path, "wb") as f:
-            pickle.dump({"model": best_clf, "feature_cols": feature_cols}, f)
+            pickle.dump(
+                {"model": best_clf, "feature_cols": feature_cols, "task": args.task},
+                f,
+            )
         saved_msg = f"Saved model to {model_path} (pickle; install joblib for .joblib)"
     else:
-        model_path = args.out_dir / "fall_rf_row.joblib"
-        joblib.dump({"model": best_clf, "feature_cols": feature_cols}, model_path)
+        model_path = args.out_dir / f"{model_stem}.joblib"
+        joblib.dump(
+            {"model": best_clf, "feature_cols": feature_cols, "task": args.task},
+            model_path,
+        )
         saved_msg = f"Saved model to {model_path}"
 
     print(json.dumps(meta, indent=2, ensure_ascii=False))
@@ -668,25 +954,31 @@ def main() -> None:
     print(saved_msg)
 
     if args.export_coreml:
-        try:
-            from .coreml_export import export_rf_joblib_to_coreml
-        except ImportError as e:  # pragma: no cover
-            print(f"Core ML export skipped (import): {e}", file=sys.stderr)
+        if args.task == "multiclass":
+            print(
+                "Core ML export skipped: exporter expects binary fall classifier (--task binary).",
+                file=sys.stderr,
+            )
         else:
             try:
-                if not model_path.is_file():
-                    raise FileNotFoundError(model_path)
-                out_m, out_manifest = export_rf_joblib_to_coreml(
-                    model_path,
-                    args.coreml_out_dir,
-                    target_name=args.coreml_target_name,
-                    window_samples=int(window_samples),
-                    hop_samples=int(hop_samples),
-                )
-                print(f"Core ML: {out_m}")
-                print(f"Core ML manifest: {out_manifest}")
-            except Exception as e:  # pragma: no cover
-                print(f"Core ML export failed: {e}", file=sys.stderr)
+                from .coreml_export import export_rf_joblib_to_coreml
+            except ImportError as e:  # pragma: no cover
+                print(f"Core ML export skipped (import): {e}", file=sys.stderr)
+            else:
+                try:
+                    if not model_path.is_file():
+                        raise FileNotFoundError(model_path)
+                    out_m, out_manifest = export_rf_joblib_to_coreml(
+                        model_path,
+                        args.coreml_out_dir,
+                        target_name=args.coreml_target_name,
+                        window_samples=int(window_samples),
+                        hop_samples=int(hop_samples),
+                    )
+                    print(f"Core ML: {out_m}")
+                    print(f"Core ML manifest: {out_manifest}")
+                except Exception as e:  # pragma: no cover
+                    print(f"Core ML export failed: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":

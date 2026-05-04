@@ -1,0 +1,419 @@
+{
+  "confusion_matrix": [
+    [
+      3,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ],
+  "classification_report": {
+    "0": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 3.0
+    },
+    "1": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1.0
+    },
+    "2": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 5.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 5.0
+    }
+  },
+  "roc_auc": 1.0,
+  "n_runs": 2,
+  "runs": [
+    {
+      "seed": 42,
+      "split_meta": {
+        "split_policy": "multiclass_adl_group_shuffle_rare_chronological",
+        "rare_class_train_ratio": 0.75,
+        "n_person_fall_windows_train": 2,
+        "n_person_fall_windows_test": 1,
+        "n_phone_drop_windows_train": 2,
+        "n_phone_drop_windows_test": 1
+      },
+      "n_windows_train": 190,
+      "n_windows_test": 5,
+      "task": "multiclass",
+      "random_forest": {
+        "confusion_matrix": [
+          [
+            3,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        "macro_f1": 1.0,
+        "fall_f1": 1.0,
+        "phone_drop_f1": 1.0,
+        "adl_f1": 1.0,
+        "roc_auc": 1.0,
+        "latency_ms_total": 42.516499999692314,
+        "latency_ms_per_window_avg": 8.503299999938463
+      },
+      "logistic_regression": {
+        "skipped": false,
+        "name": "logistic_regression_multinomial_scaled",
+        "description": "StandardScaler + sklearn LogisticRegression(solver=lbfgs) for classes: 0=ADL, 1=person fall, 2=phone drop.",
+        "confusion_matrix": [
+          [
+            3,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        "macro_f1": 1.0,
+        "fall_f1": 1.0,
+        "phone_drop_f1": 1.0,
+        "adl_f1": 1.0,
+        "roc_auc": 1.0,
+        "latency_ms_total": 0.15950000124576036,
+        "latency_ms_per_window_avg": 0.03190000024915207
+      },
+      "baseline_peak_acc": {
+        "skipped": true,
+        "reason": "Multiclass task: peak-acceleration threshold baseline is for binary person-fall vs rest only."
+      },
+      "latency_ms_on_test_windows": {
+        "random_forest_total": 42.516499999692314,
+        "random_forest_per_window_avg": 8.503299999938463,
+        "baseline_total": 0.0,
+        "baseline_per_window_avg": 0.0,
+        "logistic_regression_total": 0.15950000124576036,
+        "logistic_regression_per_window_avg": 0.03190000024915207
+      }
+    },
+    {
+      "seed": 43,
+      "split_meta": {
+        "split_policy": "multiclass_adl_group_shuffle_rare_chronological",
+        "rare_class_train_ratio": 0.75,
+        "n_person_fall_windows_train": 2,
+        "n_person_fall_windows_test": 1,
+        "n_phone_drop_windows_train": 2,
+        "n_phone_drop_windows_test": 1
+      },
+      "n_windows_train": 66,
+      "n_windows_test": 129,
+      "task": "multiclass",
+      "random_forest": {
+        "confusion_matrix": [
+          [
+            127,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        "macro_f1": 1.0,
+        "fall_f1": 1.0,
+        "phone_drop_f1": 1.0,
+        "adl_f1": 1.0,
+        "roc_auc": 1.0,
+        "latency_ms_total": 84.42329999888898,
+        "latency_ms_per_window_avg": 0.6544441860378991
+      },
+      "logistic_regression": {
+        "skipped": false,
+        "name": "logistic_regression_multinomial_scaled",
+        "description": "StandardScaler + sklearn LogisticRegression(solver=lbfgs) for classes: 0=ADL, 1=person fall, 2=phone drop.",
+        "confusion_matrix": [
+          [
+            127,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        "macro_f1": 1.0,
+        "fall_f1": 1.0,
+        "phone_drop_f1": 1.0,
+        "adl_f1": 1.0,
+        "roc_auc": 1.0,
+        "latency_ms_total": 0.26420000176585745,
+        "latency_ms_per_window_avg": 0.002048062029192693
+      },
+      "baseline_peak_acc": {
+        "skipped": true,
+        "reason": "Multiclass task: peak-acceleration threshold baseline is for binary person-fall vs rest only."
+      },
+      "latency_ms_on_test_windows": {
+        "random_forest_total": 84.42329999888898,
+        "random_forest_per_window_avg": 0.6544441860378991,
+        "baseline_total": 0.0,
+        "baseline_per_window_avg": 0.0,
+        "logistic_regression_total": 0.26420000176585745,
+        "logistic_regression_per_window_avg": 0.002048062029192693
+      }
+    }
+  ],
+  "aggregate_mean_std": {
+    "n_runs": 2,
+    "random_forest": {
+      "skipped": false,
+      "macro_f1_mean": 1.0,
+      "macro_f1_std": 0.0,
+      "fall_f1_mean": 1.0,
+      "fall_f1_std": 0.0,
+      "phone_drop_f1_mean": 1.0,
+      "phone_drop_f1_std": 0.0,
+      "roc_auc_mean": 1.0,
+      "roc_auc_std": 0.0,
+      "latency_ms_per_window_avg_mean": 4.578872092988181,
+      "latency_ms_per_window_avg_std": 3.9244279069502817
+    },
+    "logistic_regression": {
+      "skipped": false,
+      "macro_f1_mean": 1.0,
+      "macro_f1_std": 0.0,
+      "fall_f1_mean": 1.0,
+      "fall_f1_std": 0.0,
+      "phone_drop_f1_mean": 1.0,
+      "phone_drop_f1_std": 0.0,
+      "roc_auc_mean": 1.0,
+      "roc_auc_std": 0.0,
+      "latency_ms_per_window_avg_mean": 0.016974031139172382,
+      "latency_ms_per_window_avg_std": 0.01492596910997969
+    },
+    "baseline_peak_acc": {
+      "skipped": true,
+      "reason": "no numeric summaries (method skipped or missing)"
+    }
+  },
+  "method_hierarchy": [
+    {
+      "order": 1,
+      "method": "Threshold",
+      "tier": "heuristic",
+      "implementation": "peak_acc_vector_max_norm_threshold",
+      "skipped": true,
+      "reason": "no numeric summaries (method skipped or missing)"
+    },
+    {
+      "order": 2,
+      "method": "Logistic Regression",
+      "tier": "classical_ml",
+      "implementation": "sklearn LogisticRegression + StandardScaler",
+      "macro_f1_mean": 1.0,
+      "macro_f1_std": 0.0,
+      "fall_f1_mean": 1.0,
+      "fall_f1_std": 0.0,
+      "roc_auc_mean": 1.0,
+      "roc_auc_std": 0.0
+    },
+    {
+      "order": 3,
+      "method": "Random Forest",
+      "tier": "advanced_ml",
+      "implementation": "sklearn RandomForestClassifier",
+      "macro_f1_mean": 1.0,
+      "macro_f1_std": 0.0,
+      "fall_f1_mean": 1.0,
+      "fall_f1_std": 0.0,
+      "roc_auc_mean": 1.0,
+      "roc_auc_std": 0.0
+    }
+  ],
+  "best_run_by_random_forest_macro_f1": {
+    "seed": 42,
+    "split_meta": {
+      "split_policy": "multiclass_adl_group_shuffle_rare_chronological",
+      "rare_class_train_ratio": 0.75,
+      "n_person_fall_windows_train": 2,
+      "n_person_fall_windows_test": 1,
+      "n_phone_drop_windows_train": 2,
+      "n_phone_drop_windows_test": 1
+    },
+    "n_windows_train": 190,
+    "n_windows_test": 5,
+    "task": "multiclass",
+    "random_forest": {
+      "confusion_matrix": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "macro_f1": 1.0,
+      "fall_f1": 1.0,
+      "phone_drop_f1": 1.0,
+      "adl_f1": 1.0,
+      "roc_auc": 1.0,
+      "latency_ms_total": 42.516499999692314,
+      "latency_ms_per_window_avg": 8.503299999938463
+    },
+    "logistic_regression": {
+      "skipped": false,
+      "name": "logistic_regression_multinomial_scaled",
+      "description": "StandardScaler + sklearn LogisticRegression(solver=lbfgs) for classes: 0=ADL, 1=person fall, 2=phone drop.",
+      "confusion_matrix": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "macro_f1": 1.0,
+      "fall_f1": 1.0,
+      "phone_drop_f1": 1.0,
+      "adl_f1": 1.0,
+      "roc_auc": 1.0,
+      "latency_ms_total": 0.15950000124576036,
+      "latency_ms_per_window_avg": 0.03190000024915207
+    },
+    "baseline_peak_acc": {
+      "skipped": true,
+      "reason": "Multiclass task: peak-acceleration threshold baseline is for binary person-fall vs rest only."
+    },
+    "latency_ms_on_test_windows": {
+      "random_forest_total": 42.516499999692314,
+      "random_forest_per_window_avg": 8.503299999938463,
+      "baseline_total": 0.0,
+      "baseline_per_window_avg": 0.0,
+      "logistic_regression_total": 0.15950000124576036,
+      "logistic_regression_per_window_avg": 0.03190000024915207
+    }
+  },
+  "baseline_vs_rf_same_test_split": {
+    "note": "Per-run fields use *_peak_acc / random_forest / logistic_regression; see runs[] and aggregate_mean_std.",
+    "random_forest": {
+      "macro_f1": 1.0,
+      "fall_f1": 1.0,
+      "phone_drop_f1": 1.0,
+      "adl_f1": 1.0,
+      "roc_auc": 1.0,
+      "latency_ms_total": 42.516499999692314,
+      "latency_ms_per_window_avg": 8.503299999938463
+    },
+    "latency_ms_on_test_windows": {
+      "random_forest_total": 42.516499999692314,
+      "random_forest_per_window_avg": 8.503299999938463,
+      "baseline_total": 0.0,
+      "baseline_per_window_avg": 0.0,
+      "logistic_regression_total": 0.15950000124576036,
+      "logistic_regression_per_window_avg": 0.03190000024915207
+    },
+    "baseline": {
+      "skipped": true,
+      "reason": "Multiclass task: peak-acceleration threshold baseline is for binary person-fall vs rest only."
+    },
+    "logistic_regression": {
+      "skipped": false,
+      "name": "logistic_regression_multinomial_scaled",
+      "description": "StandardScaler + sklearn LogisticRegression(solver=lbfgs) for classes: 0=ADL, 1=person fall, 2=phone drop.",
+      "confusion_matrix": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "macro_f1": 1.0,
+      "fall_f1": 1.0,
+      "phone_drop_f1": 1.0,
+      "adl_f1": 1.0,
+      "roc_auc": 1.0,
+      "latency_ms_total": 0.15950000124576036,
+      "latency_ms_per_window_avg": 0.03190000024915207
+    }
+  }
+}

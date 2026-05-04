@@ -83,4 +83,5 @@ def load_fused_session(session: RowSession) -> Optional[pd.DataFrame]:
 
     base["session_group"] = session.group_key
     base["label"] = int(session.label)
+    base["multiclass"] = int(session.multiclass)
     return base.reset_index(drop=True)

@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.sentio_v2.row_loader import FALL_ACTIVITY, RowSession
+from src.sentio_v2.row_loader import FALL_ACTIVITY, RowSession, multiclass_for_activity
 from src.sentio_v2.row_session import load_fused_session
 from src.sentio_v2.row_windows import ROW_BASE_NUMERIC_COLUMN_NAMES, windows_from_session
 
@@ -53,6 +53,7 @@ def _session_from_path(session_path: Path) -> RowSession:
         session_id=p.name,
         path=p,
         label=1 if activity == FALL_ACTIVITY else 0,
+        multiclass=multiclass_for_activity(activity),
     )
 
 

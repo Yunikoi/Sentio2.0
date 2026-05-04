@@ -1,5 +1,5 @@
 {
-  "task": "binary",
+  "task": "multiclass",
   "fall_activity_folder": "AdultManFall",
   "phone_drop_activity_folder": "IndoorPhoneFall",
   "multiclass_legend": {
@@ -18,9 +18,10 @@
   "window_samples": 101,
   "hop_samples": 25,
   "n_windows": 195,
-  "n_eval_runs": 1,
+  "n_eval_runs": 2,
   "eval_seeds": [
-    42
+    42,
+    43
   ],
   "artifact_policy": "random_forest_joblib_from_run_with_highest_test_macro_f1",
   "artifact_run_index": 0,

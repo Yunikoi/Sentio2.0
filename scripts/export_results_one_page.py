@@ -65,10 +65,16 @@ def build_markdown(metrics: dict, meta: Optional[dict], metrics_path: Path) -> s
         "",
     ]
     if meta:
+        task = meta.get("task", "binary")
+        task_line = f"- **Task:** `{task}`"
+        if task == "multiclass" and meta.get("multiclass_legend"):
+            task_line += f" — legend: {meta['multiclass_legend']}"
         lines.extend(
             [
+                task_line,
                 f"- **Sessions (used):** fall={meta.get('sessions_fall_used', '?')}, "
                 f"non-fall={meta.get('sessions_nonfall_used', '?')}, "
+                f"phone_drop={meta.get('sessions_phone_drop_used', 'n/a')}, "
                 f"skipped_missing_imu={meta.get('sessions_skipped_missing_imu', '?')}",
                 f"- **Windows:** total={meta.get('n_windows', '?')}, "
                 f"window_samples={meta.get('window_samples', '?')}, hop_samples={meta.get('hop_samples', '?')}",
@@ -122,9 +128,13 @@ def build_markdown(metrics: dict, meta: Optional[dict], metrics_path: Path) -> s
         b = agg.get(key) or {}
         if b.get("skipped"):
             continue
-        one.append(
-            f"{short} macro-F1: {_pm(float(b['macro_f1_mean']), float(b['macro_f1_std']))}"
-        )
+        chunk = f"{short} macro-F1: {_pm(float(b['macro_f1_mean']), float(b['macro_f1_std']))}"
+        if "phone_drop_f1_mean" in b:
+            chunk += (
+                f"  phone-drop-F1: "
+                f"{_pm(float(b['phone_drop_f1_mean']), float(b['phone_drop_f1_std']))}"
+            )
+        one.append(chunk)
     if one:
         lines.append("  " + "  |  ".join(one))
     else:
@@ -134,19 +144,30 @@ def build_markdown(metrics: dict, meta: Optional[dict], metrics_path: Path) -> s
     br_rf = br.get("random_forest") or {}
     cm = br_rf.get("confusion_matrix")
     if cm:
-        lines.extend(
-            [
-                "",
-                "## Best RF run — confusion matrix (test)",
-                "",
-                f"seed={br.get('seed', '?')}, ROC-AUC={br_rf.get('roc_auc', 'n/a')}",
-                "",
-                "| | pred 0 | pred 1 |",
-                "|:---:|:---:|:---:|",
-                f"| **true 0** | {cm[0][0]} | {cm[0][1]} |",
-                f"| **true 1** | {cm[1][0]} | {cm[1][1]} |",
-            ]
-        )
+        lines.extend(["", "## Best RF run — confusion matrix (test)", ""])
+        lines.append(f"seed={br.get('seed', '?')}, ROC-AUC={br_rf.get('roc_auc', 'n/a')}")
+        lines.append("")
+        if isinstance(cm, list) and len(cm) == 3 and all(len(row) == 3 for row in cm):
+            lines.extend(
+                [
+                    "| | pred 0 (ADL) | pred 1 (person fall) | pred 2 (phone drop) |",
+                    "|:---:|:---:|:---:|:---:|",
+                    f"| **true 0** | {cm[0][0]} | {cm[0][1]} | {cm[0][2]} |",
+                    f"| **true 1** | {cm[1][0]} | {cm[1][1]} | {cm[1][2]} |",
+                    f"| **true 2** | {cm[2][0]} | {cm[2][1]} | {cm[2][2]} |",
+                ]
+            )
+        elif isinstance(cm, list) and len(cm) == 2 and len(cm[0]) == 2:
+            lines.extend(
+                [
+                    "| | pred 0 | pred 1 |",
+                    "|:---:|:---:|:---:|",
+                    f"| **true 0** | {cm[0][0]} | {cm[0][1]} |",
+                    f"| **true 1** | {cm[1][0]} | {cm[1][1]} |",
+                ]
+            )
+        else:
+            lines.append(f"*(Non-standard matrix shape; see metrics.json.)*  `{cm!r}`")
 
     lines.extend(
         [

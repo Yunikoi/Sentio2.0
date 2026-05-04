@@ -32,7 +32,7 @@ ROW_BASE_NUMERIC_COLUMN_NAMES: Tuple[str, ...] = (
 
 
 def _numeric_feature_matrix(df: pd.DataFrame) -> Tuple[np.ndarray, List[str]]:
-    drop = {"time", "t", "session_group", "label"}
+    drop = {"time", "t", "session_group", "label", "multiclass"}
     cols = [c for c in df.columns if c not in drop and pd.api.types.is_numeric_dtype(df[c])]
     if not cols:
         raise ValueError("No numeric columns for window features")
@@ -53,6 +53,7 @@ def windows_from_session(
     X, col_names = _numeric_feature_matrix(df)
     groups = df["session_group"].to_numpy()
     labels = df["label"].to_numpy()
+    mc = df["multiclass"].to_numpy() if "multiclass" in df.columns else np.zeros(len(df), dtype=int)
     n = X.shape[0]
 
     t_series = df["t"].to_numpy(dtype=float)
@@ -70,6 +71,7 @@ def windows_from_session(
         feats["window_t_mid"] = float(np.mean(t_series[start:end]))
         feats["session_group"] = str(groups[start])
         feats["label"] = int(labels[start])
+        feats["multiclass"] = int(mc[start])
         rows.append(feats)
 
     return pd.DataFrame(rows)
