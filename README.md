@@ -14,15 +14,17 @@ A complementary **method-facing question** is encoded in optional **3-class wind
 
 Empirical claims are backed by the **offline dual-track ablations** (`main_offline`) and the **window-level method hierarchy** on session data (`main_train_row`); reported numbers depend on your dataset and split design.
 
-### Key contributions (method-level)
+### Key contributions (research artifact — not a feature list)
 
-1. **Dual-track, cross-modal event logic for phone-only sensing.** We formulate fall detection as **temporally coupled** decisions: an inertial **impact track** (high-G and gyro gating) combined with a **slow-context track** (barometric height change and posture tilt with cooldown), rather than a single threshold on IMU magnitude alone—targeting false positives from vigorous ADL while keeping a clear engineering path to on-device deployment.
+These are **claims a reviewer can disagree with**; the code and README sections below exist to **support or falsify** them.
 
-2. **Explicit 3-way disambiguation task (person fall vs. device drop vs. ADL).** Beyond binary “fall vs. not,” we operationalize **smartphone-specific confusion**—high-energy impacts that are **not** a person fall—via a **multiclass window protocol** (`--task multiclass`) with session-integrity splits, turning a systems integration into a **testable recognition claim** about class semantics.
+1. **Insight-level contribution.** **Temporal cross-modal consistency**—linking short-horizon **inertial impact** with slower **barometric drift and posture context** on the **same handset**—is a principled way to improve **robustness under motion ambiguity** in **smartphone-only** fall detection, where a single acceleration peak is rarely sufficient evidence.
 
-3. **Nested baseline hierarchy and gap analysis on the same splits.** We fix a **reproducible ladder**: peak-acceleration threshold → scaled logistic regression → random forest on **identical** train/test partitions with **multi-seed** reporting (mean ± std), so improvements are attributed to **representation capacity**, not split luck—supporting a defensible “baseline gap” narrative for papers.
+2. **Protocol-level contribution.** We define a **smartphone-native evaluation protocol** that can **separate person falls from device-only impacts** (and both from everyday ADL) under **session-consistent splits**: negatives respect recording boundaries, rare classes use explicit chronological holdout, and the task is stated as **recognition semantics**, not “another binary IMU benchmark.”
 
-4. **Component ablations with interpretable hypotheses.** Offline evaluation separates **full dual-track**, **barometer removed**, and **Track B disabled**, tied to concrete hypotheses (e.g., whether altitude/posture context changes clip-level decisions). The README records **how to read** ablation outcomes, not only that tables exist.
+3. **Experimental contribution.** We provide a **controlled baseline hierarchy** (impact threshold → scaled logistic regression → random forest) with **repeated random splits** and aggregated **mean ± std**, so any gain is argued as **representation / modeling** rather than **sampling variance**; offline **component ablations** further isolate whether cross-modal logic changes decisions on a fixed clip corpus.
+
+4. **System contribution.** We pair the above with a **deployable on-device inference path**: sliding-window features aligned between Python and the mobile stack, **per-window latency** logged in `metrics.json`, and optional **Core ML export** for **low-latency** edge classification—closing the loop from hypothesis to something a phone can actually run.
 
 ### One-sentence insight
 
