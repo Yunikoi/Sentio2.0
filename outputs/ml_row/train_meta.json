@@ -9,11 +9,16 @@
   "window_samples": 101,
   "hop_samples": 25,
   "n_windows": 195,
-  "n_windows_train": 70,
-  "n_windows_test": 125,
-  "warning_single_fall_session": true,
-  "split_policy": "neg_session_group_shuffle_and_fall_chronological",
-  "fall_time_train_ratio": 0.75,
-  "n_fall_windows_train": 2,
-  "n_fall_windows_test": 1
+  "n_eval_runs": 5,
+  "eval_seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "artifact_policy": "random_forest_joblib_from_run_with_highest_test_macro_f1",
+  "artifact_run_index": 0,
+  "artifact_seed": 42,
+  "warning_single_fall_session": true
 }
