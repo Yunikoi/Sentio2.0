@@ -14,27 +14,26 @@ A complementary **method-facing question** is encoded in optional **3-class wind
 
 Empirical claims are backed by the **offline dual-track ablations** (`main_offline`) and the **window-level method hierarchy** on session data (`main_train_row`); reported numbers depend on your dataset and split design.
 
-### Key contributions (research artifact — not a feature list)
+### Core novelty (anchor sentence)
 
-These are **claims a reviewer can disagree with**; the code and README sections below exist to **support or falsify** them.
+> **We reformulate smartphone fall detection as a cross-modal temporal consistency problem under sensor ambiguity.**
 
-1. **Insight-level contribution.** **Temporal cross-modal consistency**—linking short-horizon **inertial impact** with slower **barometric drift and posture context** on the **same handset**—is a principled way to improve **robustness under motion ambiguity** in **smartphone-only** fall detection, where a single acceleration peak is rarely sufficient evidence.
+Use this line as the **single hook** in SOPs, talks, and the opening of a short paper; the bullets below are the **expandable claims** it organizes.
 
-2. **Protocol-level contribution.** We define a **smartphone-native evaluation protocol** that can **separate person falls from device-only impacts** (and both from everyday ADL) under **session-consistent splits**: negatives respect recording boundaries, rare classes use explicit chronological holdout, and the task is stated as **recognition semantics**, not “another binary IMU benchmark.”
+### Key contributions (SOP / abstract–ready one-liners)
 
-3. **Experimental contribution.** We provide a **controlled baseline hierarchy** (impact threshold → scaled logistic regression → random forest) with **repeated random splits** and aggregated **mean ± std**, so any gain is argued as **representation / modeling** rather than **sampling variance**; offline **component ablations** further isolate whether cross-modal logic changes decisions on a fixed clip corpus.
+Copy verbatim when you need **non-boilerplate** contribution lines; the repository is the evidence section.
 
-4. **System contribution.** We pair the above with a **deployable on-device inference path**: sliding-window features aligned between Python and the mobile stack, **per-window latency** logged in `metrics.json`, and optional **Core ML export** for **low-latency** edge classification—closing the loop from hypothesis to something a phone can actually run.
-
-### One-sentence insight
-
-> **We argue that temporal cross-modal consistency—short-horizon inertial impact coupled with slower barometric and posture context on the same handset—is the right abstraction for reducing false positives in smartphone-only fall detection, and we pair it with a multiclass “person vs. phone-drop vs. ADL” protocol so that ambiguity is evaluated rather than hidden.**
+- **Insight.** Smartphone-only fall detection requires **cross-modal temporal consistency** beyond inertial peaks.
+- **Protocol.** We introduce a **smartphone-native evaluation protocol** separating **person falls** from **device-only impacts** under **session-consistent splits**.
+- **Experimental.** We isolate **representation gains** via a **fixed baseline hierarchy** with **repeated splits** and **mean–variance** reporting.
+- **System.** We ship a **deployable sliding-window pipeline** (Python ↔ mobile feature parity, **per-window latency** in `metrics.json`, optional **Core ML**) so claims connect to **on-device** behavior.
 
 *(Empirical strength depends on your recordings; see **Baseline gap analysis**, **Ablation conclusions**, and `train_meta.json` caveats.)*
 
 ### Abstract (workshop / arXiv–style)
 
-Fall detection for older adults often assumes **extra wearables**, which can hurt **adherence** and feel stigmatizing. **Smartphones** are already carried daily and avoid that burden, but **pocket- and hand-carried** IMU streams conflate **person falls**, **device-only drops**, and **vigorous activities** behind similar acceleration peaks. **Sentio V2.0** studies **phone-only** monitoring using **IMU plus on-device barometric altitude**, organized as a **dual-track detector**: an impact-oriented track fires on high-energy motion, while a second track checks **height and posture consistency** over a longer window with denoised pressure. We release an **evaluation stack** that (i) runs **offline ablations** isolating barometer and posture-height logic, and (ii) trains **window classifiers** under a **nested baseline hierarchy** (threshold → logistic regression → random forest) with **repeated random splits** and optional **three-class** training to separate **person falls**, **phone drops**, and **ADL**. This artifact is intended as a **methods-and-protocol paper** companion (e.g., mobile sensing / IoT / ubiquitous computing workshops or a short arXiv note): we foreground **problem framing, baselines, and ablations** rather than claiming a new deep architecture; **external benchmark alignment** (e.g., public fall datasets) remains important future work. The system is **not** a regulated medical device.
+Fall detection for older adults often assumes **extra wearables**, which can hurt **adherence** and feel stigmatizing. **Smartphones** are already carried daily and avoid that burden, but **pocket- and hand-carried** IMU streams conflate **person falls**, **device-only drops**, and **vigorous activities** behind similar acceleration peaks. **Sentio V2.0** reframes the problem as **cross-modal temporal consistency under ambiguity** and studies **phone-only** monitoring using **IMU plus on-device barometric altitude** in a **dual-track detector** (high-energy inertial gating with slower height/posture context on denoised pressure). We release an **evaluation stack** that (i) runs **offline ablations** isolating barometer and posture-height logic, and (ii) trains **window classifiers** under a **nested baseline hierarchy** (threshold → logistic regression → random forest) with **repeated random splits** and optional **three-class** training. **This work targets ubiquitous computing / mobile sensing protocol design rather than model optimization:** we foreground **task definition, splits, and baselines**, not a new deep architecture leaderboard; **external benchmark alignment** remains future work. The system is **not** SOTA-by-default and **not** a regulated medical device.
 
 ---
 
@@ -113,6 +112,8 @@ python -m src.sentio_v2.main_train_row --row-root data_sensor/row --out-dir outp
 Optional one-page text: `python scripts/export_results_one_page.py --metrics outputs/ml_row/metrics.json` → `RESULTS_ONE_PAGE.md`.
 
 ## Relation to public benchmarks (“SOTA”) — honest positioning
+
+**Academic positioning:** This work targets **ubiquitous computing / mobile sensing protocol design** (how to define the task, splits, and baselines on commodity phones) **rather than model optimization** or a new SOTA network.
 
 This repository is **not** a drop-in reproduction of a single published leaderboard. Recordings under `data_sensor/row` are **custom phone sessions** (pocket/hand, mixed ADL, optional barometer), evaluated **per sliding window** (and optionally **3-class** disambiguation). That protocol differs from most wearable fall-detection papers, which often use **waist-mounted** accelerometers, **different sampling rates**, and public sets such as **SisFall**, **UR Fall Detection Dataset**, **MobFall**, or **KFall** (names vary by survey; pick the set closest to your sensor placement when you cite).
 
