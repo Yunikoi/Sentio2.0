@@ -14,7 +14,7 @@ A complementary **method-facing question** is encoded in optional **3-class wind
 
 Empirical claims are backed by the **offline dual-track ablations** (`main_offline`) and the **window-level method hierarchy** on session data (`main_train_row`); reported numbers depend on your dataset and split design.
 
-## 🚀 Key Features
+##  Key Features
 
 - **Signal conditioning:** Real-time barometer denoising via a 2nd-order Butterworth low-pass filter.
 - **Dual-track fusion:**
@@ -24,14 +24,14 @@ Empirical claims are backed by the **offline dual-track ablations** (`main_offli
 - **Evaluation Suite:** Comprehensive offline evaluation pipeline supporting ablation studies and performance metrics (Precision, Recall, F1-Score).
 - **Visualization:** Integrated 5D physical-state dashboard for in-depth event analysis.
 
-## 🛠️ Project Structure
+##  Project Structure
 
 - `src/sentio_v2/`: Core algorithm implementation and detection logic.
 - `scripts/`: Utility scripts for synthetic data generation and data cleaning.
 - `data/`: Local storage for raw and processed sensor datasets.
 - `outputs/`: Performance reports and visualization results.
 
-## 💻 Installation
+##  Installation
 
 Ensuring your Python environment is ready for signal processing:
 
@@ -39,7 +39,7 @@ Ensuring your Python environment is ready for signal processing:
 pip install -r requirements.txt
 ```
 
-## 📊 Quick Start
+##  Quick Start
 
 ### 1. Data Preparation (Simulation)
 Generate a standardized benchmark dataset for testing the pipeline:
@@ -110,7 +110,7 @@ Fall detection from a **phone in the pocket or hand** (wrist-like motion is a sp
 ## System Implications
 **Latency and deployment:** Sliding-window inference adds batch predict time per window; `metrics.json` records average milliseconds per test window for threshold, LR, and RF baselines—use these numbers for edge versus cloud discussions (Core ML export is supported from the chosen RF checkpoint). **Privacy:** On-device inference avoids streaming raw sensor traces to a server, which matters for home monitoring. **Robustness:** Barometer-assisted logic (`main_offline` / dual-track path) targets height and posture context; missing or noisy barometer channels change false alarm trade-offs. **Scope:** This repository implements research and engineering prototypes; it is **not** a certified medical device and should not be presented as clinical validation without protocol, ethics review, and regulated study design.
 
-## 📈 Data Schema
+##  Data Schema
 The system expects standardized CSV inputs with the following fields:
 | Column | Unit | Description |
 | :--- | :--- | :--- |
