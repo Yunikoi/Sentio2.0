@@ -2,7 +2,7 @@
 
 Sentio V2.0 is a research-oriented IoT framework designed for robust human fall detection. By integrating multi-modal sensor data (3-axis Accelerometer, 3-axis Gyroscope, and Barometric Altimeter), the system implements a **Dual-Track Decision Logic** to minimize false alarms while maintaining high sensitivity for complex fall scenarios.
 
-## 🚀 Key Features
+##  Key Features
 
 - **Signal Conditioning:** Real-time barometer denoising via a 2nd-order Butterworth low-pass filter....
 - **Dual-Track Fusion:** - `Track A`: High-G impact detection and SVM (Signal Vector Magnitude) analysis.
@@ -11,14 +11,14 @@ Sentio V2.0 is a research-oriented IoT framework designed for robust human fall 
 - **Evaluation Suite:** Comprehensive offline evaluation pipeline supporting ablation studies and performance metrics (Precision, Recall, F1-Score).
 - **Visualization:** Integrated 5D physical-state dashboard for in-depth event analysis.
 
-## 🛠️ Project Structure
+##  Project Structure
 
 - `src/sentio_v2/`: Core algorithm implementation and detection logic.
 - `scripts/`: Utility scripts for synthetic data generation and data cleaning.
 - `data/`: Local storage for raw and processed sensor datasets.
 - `outputs/`: Performance reports and visualization results.
 
-## 💻 Installation
+##  Installation
 
 Ensuring your Python environment is ready for signal processing:
 
@@ -26,7 +26,7 @@ Ensuring your Python environment is ready for signal processing:
 pip install -r requirements.txt
 ```
 
-## 📊 Quick Start
+##  Quick Start
 
 ### 1. Data Preparation (Simulation)
 Generate a standardized benchmark dataset for testing the pipeline:
@@ -67,7 +67,7 @@ Fall detection from wrist- or pocket-mounted IMU is inherently ambiguous: **high
 ## System Implications
 **Latency and deployment:** Sliding-window inference adds batch predict time per window; `metrics.json` records average milliseconds per test window for threshold, LR, and RF baselines—use these numbers for edge versus cloud discussions (Core ML export is supported from the chosen RF checkpoint). **Privacy:** On-device inference avoids streaming raw sensor traces to a server, which matters for home monitoring. **Robustness:** Barometer-assisted logic (`main_offline` / dual-track path) targets height and posture context; missing or noisy barometer channels change false alarm trade-offs. **Scope:** This repository implements research and engineering prototypes; it is **not** a certified medical device and should not be presented as clinical validation without protocol, ethics review, and regulated study design.
 
-## 📈 Data Schema
+##  Data Schema
 The system expects standardized CSV inputs with the following fields:
 | Column | Unit | Description |
 | :--- | :--- | :--- |
