@@ -2,6 +2,8 @@
 
 Sentio V2.0 is a research codebase for **high-precision fall detection on a commodity smartphone**—the device older adults already carry—so monitoring does **not** depend on dedicated pendants, wristbands, or other “medical” wearables that raise **adherence, stigma, and psychological burden**.
 
+**Global positioning.** **This work focuses on protocol design in ubiquitous sensing rather than model benchmarking**—i.e., we read as **systems + sensing researchers** who specify **tasks, splits, and baselines** on commodity phones, not as **benchmark competitors** optimizing a leaderboard architecture. **Scope (still true):** we do **not** claim public-dataset SOTA and we are **not** a regulated medical device; those lines delimit liability, but they do **not** define the intellectual identity of the project.
+
 ### Research problem
 
 **What is still unsolved?** Useful fall alerts require both sensitivity and trust. Dedicated wearables can work well technically, but many older adults resist, forget, or feel labeled by extra devices; purely “invisible” home sensors are not always acceptable either. The phone is a **daily-use, non–medical-looking** platform, yet **phone-only inertial sensing** remains ambiguous: vigorous daily motion and soft falls are easy to confuse with true falls.
