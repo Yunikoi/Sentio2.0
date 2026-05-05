@@ -39,7 +39,7 @@ Fall detection for older adults often assumes **extra wearables**, which can hur
 
 ---
 
-## 🚀 Key Features
+##  Key Features
 
 - **Signal conditioning:** Real-time barometer denoising via a 2nd-order Butterworth low-pass filter.
 - **Dual-track fusion:**
@@ -49,14 +49,14 @@ Fall detection for older adults often assumes **extra wearables**, which can hur
 - **Evaluation Suite:** Comprehensive offline evaluation pipeline supporting ablation studies and performance metrics (Precision, Recall, F1-Score).
 - **Visualization:** Integrated 5D physical-state dashboard for in-depth event analysis.
 
-## 🛠️ Project Structure
+##  Project Structure
 
 - `src/sentio_v2/`: Core algorithm implementation and detection logic.
 - `scripts/`: Utility scripts for synthetic data generation and data cleaning.
 - `data/`: Local storage for raw and processed sensor datasets.
 - `outputs/`: Performance reports and visualization results.
 
-## 💻 Installation
+##  Installation
 
 Ensuring your Python environment is ready for signal processing:
 
@@ -64,7 +64,7 @@ Ensuring your Python environment is ready for signal processing:
 pip install -r requirements.txt
 ```
 
-## 📊 Quick Start
+##  Quick Start
 
 ### 1. Data Preparation (Simulation)
 Generate a standardized benchmark dataset for testing the pipeline:
@@ -145,9 +145,8 @@ Fall detection from a **phone in the pocket or hand** (wrist-like motion is a sp
 
 **Suggested paper sentence.** *Raw sensor recordings are not publicly released; we describe the acquisition protocol and report aggregate evaluation metrics. The code release enables reproduction on synthetic and example datasets.*
 
-**中文（仓库说明）：** 原始传感数据不随本仓库公开；论文中应描述采集协议并报告聚合指标。复现请使用本文档中的合成数据与示例数据（如 `data/day2`）及对应命令。
 
-## 📈 Data Schema
+##  Data Schema
 The system expects standardized CSV inputs with the following fields:
 | Column | Unit | Description |
 | :--- | :--- | :--- |
@@ -156,7 +155,7 @@ The system expects standardized CSV inputs with the following fields:
 | `gyro_x/y/z` | deg/s | 3-axis angular velocity |
 | `baro_m` | m | Relative altitude derived from barometric pressure |
 
-## 📡 Future Deployment (IoMT)
+##  Future Deployment (IoMT)
 - **Edge computing:** Port the `DualTrackDetector` state machine to React Native so inference stays **on the user’s existing phone**—no extra wearable required.
 - **Cloud alerting:** Optional alert payload delivery via Firebase Cloud Messaging (FCM).
 - **Elder care context:** Low-power sensor polling aligned with **daily-carry** use; still **not** a certified medical device without clinical protocol and regulatory review.
