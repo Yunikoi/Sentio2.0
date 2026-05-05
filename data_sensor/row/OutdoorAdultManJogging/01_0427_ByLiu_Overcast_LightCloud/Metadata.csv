@@ -1,0 +1,2 @@
+version,device name,recording epoch time,recording time,recording timezone,platform,appVersion,device id,sensors,sampleRateMs,standardisation,platform version
+3,iPhone 13 Pro Max,1776228781756,2026-04-15_04-53-01,Asia/Shanghai,ios,1.56,e68f22c8-e53c-4fd0-ac5e-f787c8083cf7,Accelerometer|Gravity|Gyroscope|Orientation|Barometer|Annotation|GyroscopeUncalibrated|AccelerometerUncalibrated,20|20|20|20|0||20|20,false,26.2

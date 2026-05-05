@@ -137,6 +137,16 @@ Fall detection from a **phone in the pocket or hand** (wrist-like motion is a sp
 ## System Implications
 **Latency and deployment:** Sliding-window inference adds batch predict time per window; `metrics.json` records average milliseconds per test window for threshold, LR, and RF baselines—use these numbers for edge versus cloud discussions (Core ML export is supported from the chosen RF checkpoint). **Privacy:** On-device inference avoids streaming raw sensor traces to a server, which matters for home monitoring. **Robustness:** Barometer-assisted logic (`main_offline` / dual-track path) targets height and posture context; missing or noisy barometer channels change false alarm trade-offs. **Scope:** This repository implements research and engineering prototypes; it is **not** a certified medical device and should not be presented as clinical validation without protocol, ethics review, and regulated study design.
 
+## Data availability
+
+**Repository policy.** Raw smartphone sessions used in our experiments (e.g. material under `data_sensor/`) are **not redistributed** with this repository, to protect participant privacy and avoid publishing identifiable sensor traces.
+
+**Reproducibility without private data.** The released code can be executed end-to-end using **non-sensitive inputs** bundled or generated here: `scripts/generate_synthetic_dataset.py`, the small offline tree `data/day2`, and the commands documented above. Aggregate artifacts under `outputs/` are snapshots from those or internal runs, as noted in context.
+
+**Suggested paper sentence.** *Raw sensor recordings are not publicly released; we describe the acquisition protocol and report aggregate evaluation metrics. The code release enables reproduction on synthetic and example datasets.*
+
+**中文（仓库说明）：** 原始传感数据不随本仓库公开；论文中应描述采集协议并报告聚合指标。复现请使用本文档中的合成数据与示例数据（如 `data/day2`）及对应命令。
+
 ## 📈 Data Schema
 The system expects standardized CSV inputs with the following fields:
 | Column | Unit | Description |
